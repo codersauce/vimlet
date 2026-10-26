@@ -1,0 +1,26 @@
+name: Vimlet
+on: [push, pull_request]
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        features: ["--no-default-features", "--features ropey"]
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install 1.90.0 --profile minimal
+      - run: cargo +1.90.0 test --locked ${{ matrix.features }}
+      - run: cargo clippy --locked --all-targets ${{ matrix.features }} -- -D warnings
+      - run: cargo doc --locked --no-deps ${{ matrix.features }}
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - run: cargo fmt --all -- --check
+  reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          curl --fail --location --output "$RUNNER_TEMP/nvim.tar.gz" https://github.com/neovim/neovim/releases/download/v0.12.1/nvim-linux-x86_64.tar.gz
+          tar -xzf "$RUNNER_TEMP/nvim.tar.gz" -C "$RUNNER_TEMP"
+          python3 scripts/conformance.py --nvim "$RUNNER_TEMP/nvim-linux-x86_64/bin/nvim"
+      - run: python3 scripts/check_package.py

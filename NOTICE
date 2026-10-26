@@ -1,0 +1,6 @@
+Vimlet originated in the Red editor by Felipe Coury.
+Motion/text-object algorithms and modal editing design are adapted from
+Red src/editing/motion.rs and src/editing/textarea.rs at
+a6833074a0def1087e4454102f27089d2b50a19d (MIT, copyright 2024 Felipe Coury).
+The adaptation replaces Red's buffer, coordinate, history and terminal APIs.
+No Codex source is included. Neovim is a development reference, not a dependency.

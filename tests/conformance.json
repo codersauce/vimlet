@@ -1,0 +1,1408 @@
+[
+  {
+    "name": "word delete",
+    "text": "one two three",
+    "keys": "dw"
+  },
+  {
+    "name": "change insert dot",
+    "text": "one two three",
+    "keys": "cwhello<Esc>w."
+  },
+  {
+    "name": "counted dot override",
+    "text": "one two three four five six seven eight",
+    "keys": "2dw3."
+  },
+  {
+    "name": "around whitespace",
+    "text": "hello world",
+    "cursor": 5,
+    "keys": "daw"
+  },
+  {
+    "name": "inner whitespace",
+    "text": "hello world",
+    "cursor": 5,
+    "keys": "diw"
+  },
+  {
+    "name": "emoji interior find",
+    "text": "a👩‍💻z",
+    "keys": "f💻"
+  },
+  {
+    "name": "emoji replace",
+    "text": "a👩‍💻z",
+    "keys": "f👩rX"
+  },
+  {
+    "name": "emoji till",
+    "text": "a👩‍💻r",
+    "keys": "tr"
+  },
+  {
+    "name": "combining find delete",
+    "text": "aहिr",
+    "keys": "dfह"
+  },
+  {
+    "name": "default Y mapping",
+    "text": "one two",
+    "cursor": 4,
+    "keys": "Y"
+  },
+  {
+    "name": "operator count composition",
+    "text": "one two three four five six seven",
+    "keys": "2d3w"
+  },
+  {
+    "name": "line delete",
+    "text": "one\ntwo\nthree",
+    "keys": "dd"
+  },
+  {
+    "name": "end line delete",
+    "text": "one\ntwo\nthree",
+    "keys": "Gdd"
+  },
+  {
+    "name": "change line",
+    "text": "one\ntwo",
+    "keys": "ccHELLO<Esc>"
+  },
+  {
+    "name": "replace recovery",
+    "text": "abcdef",
+    "keys": "RXY<BS>Z<Esc>"
+  },
+  {
+    "name": "visual delete",
+    "text": "one two three",
+    "keys": "vllld"
+  },
+  {
+    "name": "visual line",
+    "text": "one\ntwo\nthree",
+    "keys": "Vjd"
+  },
+  {
+    "name": "nested object",
+    "text": "a(b(c)d)e",
+    "cursor": 4,
+    "keys": "d2i)"
+  },
+  {
+    "name": "quote escape",
+    "text": "a \"b\\\"c\" z",
+    "cursor": 5,
+    "keys": "di\""
+  },
+  {
+    "name": "macro record and play",
+    "text": "abc def ghi",
+    "keys": "qaix<Esc>lq@a"
+  },
+  {
+    "name": "last macro",
+    "text": "abc def ghi",
+    "keys": "qaxq@a@@"
+  },
+  {
+    "name": "counted macro",
+    "text": "abcdef",
+    "keys": "qaxq3@a"
+  },
+  {
+    "name": "join",
+    "text": "one\n  two\nthree",
+    "keys": "J"
+  },
+  {
+    "name": "raw join",
+    "text": "one\n  two",
+    "keys": "gJ"
+  },
+  {
+    "name": "pending operator",
+    "text": "one two",
+    "keys": "d"
+  },
+  {
+    "name": "incomplete Insert",
+    "text": "one two",
+    "keys": "iX"
+  },
+  {
+    "name": "incomplete Visual",
+    "text": "one two",
+    "keys": "vl"
+  },
+  {
+    "name": "operator Escape",
+    "text": "one two",
+    "keys": "d<Esc>"
+  },
+  {
+    "name": "counted insert",
+    "text": "abc",
+    "keys": "3ix<Esc>"
+  },
+  {
+    "name": "paste character",
+    "text": "abc def",
+    "keys": "yiwwp"
+  },
+  {
+    "name": "paragraph object",
+    "text": "one\ntwo\n\nthree",
+    "keys": "dap"
+  },
+  {
+    "name": "sentence object",
+    "text": "One. Two! Three?",
+    "keys": "das"
+  },
+  {
+    "name": "case operator",
+    "text": "One Two Three",
+    "keys": "gUiw"
+  },
+  {
+    "name": "motion h at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "h"
+  },
+  {
+    "name": "motion h at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "h"
+  },
+  {
+    "name": "motion h at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "h"
+  },
+  {
+    "name": "motion l at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "l"
+  },
+  {
+    "name": "motion l at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "l"
+  },
+  {
+    "name": "motion l at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "l"
+  },
+  {
+    "name": "motion j at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "j"
+  },
+  {
+    "name": "motion j at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "j"
+  },
+  {
+    "name": "motion j at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "j"
+  },
+  {
+    "name": "motion k at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "k"
+  },
+  {
+    "name": "motion k at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "k"
+  },
+  {
+    "name": "motion k at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "k"
+  },
+  {
+    "name": "motion w at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "w"
+  },
+  {
+    "name": "motion w at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "w"
+  },
+  {
+    "name": "motion w at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "w"
+  },
+  {
+    "name": "motion b at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "b"
+  },
+  {
+    "name": "motion b at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "b"
+  },
+  {
+    "name": "motion b at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "b"
+  },
+  {
+    "name": "motion e at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "e"
+  },
+  {
+    "name": "motion e at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "e"
+  },
+  {
+    "name": "motion e at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "e"
+  },
+  {
+    "name": "motion ge at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "ge"
+  },
+  {
+    "name": "motion ge at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "ge"
+  },
+  {
+    "name": "motion ge at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "ge"
+  },
+  {
+    "name": "motion W at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "W"
+  },
+  {
+    "name": "motion W at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "W"
+  },
+  {
+    "name": "motion W at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "W"
+  },
+  {
+    "name": "motion B at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "B"
+  },
+  {
+    "name": "motion B at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "B"
+  },
+  {
+    "name": "motion B at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "B"
+  },
+  {
+    "name": "motion E at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "E"
+  },
+  {
+    "name": "motion E at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "E"
+  },
+  {
+    "name": "motion E at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "E"
+  },
+  {
+    "name": "motion gE at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "gE"
+  },
+  {
+    "name": "motion gE at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "gE"
+  },
+  {
+    "name": "motion gE at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "gE"
+  },
+  {
+    "name": "motion $ at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "$"
+  },
+  {
+    "name": "motion $ at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "$"
+  },
+  {
+    "name": "motion $ at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "$"
+  },
+  {
+    "name": "motion 0 at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "0"
+  },
+  {
+    "name": "motion 0 at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "0"
+  },
+  {
+    "name": "motion 0 at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "0"
+  },
+  {
+    "name": "motion ^ at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "^"
+  },
+  {
+    "name": "motion ^ at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "^"
+  },
+  {
+    "name": "motion ^ at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "^"
+  },
+  {
+    "name": "motion gg at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "gg"
+  },
+  {
+    "name": "motion gg at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "gg"
+  },
+  {
+    "name": "motion gg at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "gg"
+  },
+  {
+    "name": "motion G at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "G"
+  },
+  {
+    "name": "motion G at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "G"
+  },
+  {
+    "name": "motion G at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "G"
+  },
+  {
+    "name": "motion 50% at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "50%"
+  },
+  {
+    "name": "motion 50% at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "50%"
+  },
+  {
+    "name": "motion 50% at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "50%"
+  },
+  {
+    "name": "motion { at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "{"
+  },
+  {
+    "name": "motion { at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "{"
+  },
+  {
+    "name": "motion { at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "{"
+  },
+  {
+    "name": "motion } at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "}"
+  },
+  {
+    "name": "motion } at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "}"
+  },
+  {
+    "name": "motion } at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "}"
+  },
+  {
+    "name": "motion ( at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "("
+  },
+  {
+    "name": "motion ( at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "("
+  },
+  {
+    "name": "motion ( at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "("
+  },
+  {
+    "name": "motion ) at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": ")"
+  },
+  {
+    "name": "motion ) at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": ")"
+  },
+  {
+    "name": "motion ) at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": ")"
+  },
+  {
+    "name": "motion 2w at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "2w"
+  },
+  {
+    "name": "motion 2w at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "2w"
+  },
+  {
+    "name": "motion 2w at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "2w"
+  },
+  {
+    "name": "motion 3e at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "3e"
+  },
+  {
+    "name": "motion 3e at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "3e"
+  },
+  {
+    "name": "motion 3e at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "3e"
+  },
+  {
+    "name": "motion 2b at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "2b"
+  },
+  {
+    "name": "motion 2b at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "2b"
+  },
+  {
+    "name": "motion 2b at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "2b"
+  },
+  {
+    "name": "motion 2ge at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "2ge"
+  },
+  {
+    "name": "motion 2ge at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "2ge"
+  },
+  {
+    "name": "motion 2ge at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "2ge"
+  },
+  {
+    "name": "motion 2j at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "2j"
+  },
+  {
+    "name": "motion 2j at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "2j"
+  },
+  {
+    "name": "motion 2j at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "2j"
+  },
+  {
+    "name": "motion 2$ at 2",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 2,
+    "keys": "2$"
+  },
+  {
+    "name": "motion 2$ at 6",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 6,
+    "keys": "2$"
+  },
+  {
+    "name": "motion 2$ at 10",
+    "text": "  one two\nthree.\n\nfour five!\nsix",
+    "cursor": 10,
+    "keys": "2$"
+  },
+  {
+    "name": "operator d$",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d$"
+  },
+  {
+    "name": "operator d0",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d0"
+  },
+  {
+    "name": "operator d^",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d^"
+  },
+  {
+    "name": "operator dG",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "dG"
+  },
+  {
+    "name": "operator dgg",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "dgg"
+  },
+  {
+    "name": "operator d2j",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d2j"
+  },
+  {
+    "name": "operator d2k",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d2k"
+  },
+  {
+    "name": "operator d%",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d%"
+  },
+  {
+    "name": "operator d}",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d}"
+  },
+  {
+    "name": "operator d)",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d)"
+  },
+  {
+    "name": "operator dw",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "dw"
+  },
+  {
+    "name": "operator dW",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "dW"
+  },
+  {
+    "name": "operator db",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "db"
+  },
+  {
+    "name": "operator de",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "de"
+  },
+  {
+    "name": "operator dge",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "dge"
+  },
+  {
+    "name": "operator cwX<Esc>",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "cwX<Esc>"
+  },
+  {
+    "name": "operator c2wX<Esc>",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "c2wX<Esc>"
+  },
+  {
+    "name": "operator cWZ<Esc>",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "cWZ<Esc>"
+  },
+  {
+    "name": "operator diw",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "diw"
+  },
+  {
+    "name": "operator d2iw",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d2iw"
+  },
+  {
+    "name": "operator d3iw",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d3iw"
+  },
+  {
+    "name": "operator d2aw",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d2aw"
+  },
+  {
+    "name": "operator daw",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "daw"
+  },
+  {
+    "name": "operator d2aW",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "d2aW"
+  },
+  {
+    "name": "operator guu",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "guu"
+  },
+  {
+    "name": "operator gUU",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "gUU"
+  },
+  {
+    "name": "operator g~~",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "g~~"
+  },
+  {
+    "name": "operator x",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "x"
+  },
+  {
+    "name": "operator X",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "X"
+  },
+  {
+    "name": "operator 3x",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "3x"
+  },
+  {
+    "name": "operator 3rZ",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "3rZ"
+  },
+  {
+    "name": "operator sX<Esc>",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "sX<Esc>"
+  },
+  {
+    "name": "operator 2sX<Esc>",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "2sX<Esc>"
+  },
+  {
+    "name": "operator Sx<Esc>",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "Sx<Esc>"
+  },
+  {
+    "name": "operator D",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "D"
+  },
+  {
+    "name": "operator Cz<Esc>",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "Cz<Esc>"
+  },
+  {
+    "name": "operator ~",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "~"
+  },
+  {
+    "name": "operator 3~",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "3~"
+  },
+  {
+    "name": "operator p",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "p"
+  },
+  {
+    "name": "operator P",
+    "text": "  one (two)\nthree four\nfive six",
+    "cursor": 7,
+    "keys": "P"
+  },
+  {
+    "name": "composition qaxqqAlq@a 0",
+    "text": "one two three",
+    "cursor": 0,
+    "keys": "qaxqqAlq@a"
+  },
+  {
+    "name": "composition 3iab<BS><Esc> 0",
+    "text": "one two three",
+    "cursor": 0,
+    "keys": "3iab<BS><Esc>"
+  },
+  {
+    "name": "composition RXY<BS>Z<Esc>w. 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "RXY<BS>Z<Esc>w."
+  },
+  {
+    "name": "composition vldw. 0",
+    "text": "abc def ghi",
+    "cursor": 0,
+    "keys": "vldw."
+  },
+  {
+    "name": "composition vlcX<Esc>w. 0",
+    "text": "abc def ghi",
+    "cursor": 0,
+    "keys": "vlcX<Esc>w."
+  },
+  {
+    "name": "composition Vd. 0",
+    "text": "abc\ndef\nghi",
+    "cursor": 0,
+    "keys": "Vd."
+  },
+  {
+    "name": "composition <C-v>jlrX 0",
+    "text": "abcdef\nghijkl",
+    "cursor": 0,
+    "keys": "<C-v>jlrX"
+  },
+  {
+    "name": "composition <C-v>jlcX<Esc> 0",
+    "text": "abcdef\nghijkl",
+    "cursor": 0,
+    "keys": "<C-v>jlcX<Esc>"
+  },
+  {
+    "name": "composition <C-v>jlIX<Esc> 0",
+    "text": "abcdef\nghijkl",
+    "cursor": 0,
+    "keys": "<C-v>jlIX<Esc>"
+  },
+  {
+    "name": "composition <C-v>jlAX<Esc> 0",
+    "text": "abcdef\nghijkl",
+    "cursor": 0,
+    "keys": "<C-v>jlAX<Esc>"
+  },
+  {
+    "name": "composition yyp 0",
+    "text": "abc\ndef\nghi",
+    "cursor": 0,
+    "keys": "yyp"
+  },
+  {
+    "name": "composition GyyP 0",
+    "text": "abc\ndef\nghi",
+    "cursor": 0,
+    "keys": "GyyP"
+  },
+  {
+    "name": "composition ddp 0",
+    "text": "abc\ndef",
+    "cursor": 0,
+    "keys": "ddp"
+  },
+  {
+    "name": "composition oX<Esc> 0",
+    "text": "abc\ndef",
+    "cursor": 0,
+    "keys": "oX<Esc>"
+  },
+  {
+    "name": "composition OX<Esc> 0",
+    "text": "abc\ndef",
+    "cursor": 0,
+    "keys": "OX<Esc>"
+  },
+  {
+    "name": "composition 3oX<Esc> 0",
+    "text": "abc",
+    "cursor": 0,
+    "keys": "3oX<Esc>"
+  },
+  {
+    "name": "composition t:; 0",
+    "text": "a:b:c:d",
+    "cursor": 0,
+    "keys": "t:;"
+  },
+  {
+    "name": "composition T:; 6",
+    "text": "a:b:c:d",
+    "cursor": 6,
+    "keys": "T:;"
+  },
+  {
+    "name": "composition f:;, 0",
+    "text": "a:b:c:d",
+    "cursor": 0,
+    "keys": "f:;,"
+  },
+  {
+    "name": "composition dw 0",
+    "text": "one\ntwo\nthree",
+    "cursor": 0,
+    "keys": "dw"
+  },
+  {
+    "name": "composition 2dw 0",
+    "text": "one\ntwo\nthree",
+    "cursor": 0,
+    "keys": "2dw"
+  },
+  {
+    "name": "composition 2di) 4",
+    "text": "a(b(c)d)e",
+    "cursor": 4,
+    "keys": "2di)"
+  },
+  {
+    "name": "composition di\" 0",
+    "text": "abc \"def\" ghi",
+    "cursor": 0,
+    "keys": "di\""
+  },
+  {
+    "name": "composition xi<Esc>. 0",
+    "text": "abc",
+    "cursor": 0,
+    "keys": "xi<Esc>."
+  },
+  {
+    "name": "composition iX<Esc>u<C-r> 0",
+    "text": "abc",
+    "cursor": 0,
+    "keys": "iX<Esc>u<C-r>"
+  },
+  {
+    "name": "composition xU 0",
+    "text": "abc",
+    "cursor": 0,
+    "keys": "xU"
+  },
+  {
+    "name": "composition d 0",
+    "text": "abc\ndef",
+    "cursor": 0,
+    "keys": "d"
+  },
+  {
+    "name": "composition RZ 0",
+    "text": "abc",
+    "cursor": 0,
+    "keys": "RZ"
+  },
+  {
+    "name": "composition l 0",
+    "text": "a👩‍💻z",
+    "cursor": 0,
+    "keys": "l"
+  },
+  {
+    "name": "composition rX 1",
+    "text": "aहिz",
+    "cursor": 1,
+    "keys": "rX"
+  },
+  {
+    "name": "edge qavl<Esc>xq@a 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "qavl<Esc>xq@a"
+  },
+  {
+    "name": "edge qad<Esc>xq@a 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "qad<Esc>xq@a"
+  },
+  {
+    "name": "edge qaxqqAlq@a 0",
+    "text": "abcdefgh",
+    "cursor": 0,
+    "keys": "qaxqqAlq@a"
+  },
+  {
+    "name": "edge 2iX<Esc>3. 0",
+    "text": "abcdef",
+    "cursor": 0,
+    "keys": "2iX<Esc>3."
+  },
+  {
+    "name": "edge 2RX<Esc>3. 0",
+    "text": "abcdef",
+    "cursor": 0,
+    "keys": "2RX<Esc>3."
+  },
+  {
+    "name": "edge vlcXY<Esc>w. 0",
+    "text": "abc def ghi",
+    "cursor": 0,
+    "keys": "vlcXY<Esc>w."
+  },
+  {
+    "name": "edge vldw2. 0",
+    "text": "abc def ghi",
+    "cursor": 0,
+    "keys": "vldw2."
+  },
+  {
+    "name": "edge Vjd. 0",
+    "text": "abc\ndef\nghi\njkl",
+    "cursor": 0,
+    "keys": "Vjd."
+  },
+  {
+    "name": "edge VjcX<Esc>j. 0",
+    "text": "abc\ndef\nghi\njkl",
+    "cursor": 0,
+    "keys": "VjcX<Esc>j."
+  },
+  {
+    "name": "edge vlywp 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "vlywp"
+  },
+  {
+    "name": "edge vlp 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "vlp"
+  },
+  {
+    "name": "edge yiwWviwp 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "yiwWviwp"
+  },
+  {
+    "name": "edge j 2",
+    "text": "a\tb\n012345678901\nxxx",
+    "cursor": 2,
+    "keys": "j"
+  },
+  {
+    "name": "edge j 5",
+    "text": "ab界d\n0123456789",
+    "cursor": 5,
+    "keys": "j"
+  },
+  {
+    "name": "edge jj 4",
+    "text": "abcdef\nx\n12345678",
+    "cursor": 4,
+    "keys": "jj"
+  },
+  {
+    "name": "edge $j 0",
+    "text": "abc\ndefgh\nx",
+    "cursor": 0,
+    "keys": "$j"
+  },
+  {
+    "name": "edge G2dgg 0",
+    "text": "abc\ndef\nghi",
+    "cursor": 0,
+    "keys": "G2dgg"
+  },
+  {
+    "name": "edge dj 0",
+    "text": "abc\ndef",
+    "cursor": 0,
+    "keys": "dj"
+  },
+  {
+    "name": "edge dk 4",
+    "text": "abc\ndef",
+    "cursor": 4,
+    "keys": "dk"
+  },
+  {
+    "name": "edge 3di) 3",
+    "text": "(a(b)c)",
+    "cursor": 3,
+    "keys": "3di)"
+  },
+  {
+    "name": "edge 2diw 0",
+    "text": "foo.bar baz",
+    "cursor": 0,
+    "keys": "2diw"
+  },
+  {
+    "name": "edge 2diw 0",
+    "text": "one \n  two",
+    "cursor": 0,
+    "keys": "2diw"
+  },
+  {
+    "name": "edge dis 7",
+    "text": "one! Two.\n\nThree?",
+    "cursor": 7,
+    "keys": "dis"
+  },
+  {
+    "name": "edge 2dis 7",
+    "text": "one! Two.\n\nThree?",
+    "cursor": 7,
+    "keys": "2dis"
+  },
+  {
+    "name": "edge 2dap 0",
+    "text": "one\n\ntwo\n\nthree",
+    "cursor": 0,
+    "keys": "2dap"
+  },
+  {
+    "name": "edge 2dip 2",
+    "text": "one\n\ntwo\n\nthree",
+    "cursor": 2,
+    "keys": "2dip"
+  },
+  {
+    "name": "edge 3OX<Esc> 0",
+    "text": "abc",
+    "cursor": 0,
+    "keys": "3OX<Esc>"
+  },
+  {
+    "name": "edge Ré<Esc> 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "Ré<Esc>"
+  },
+  {
+    "name": "edge Ré<BS><Esc> 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "Ré<BS><Esc>"
+  },
+  {
+    "name": "edge 2w 0",
+    "text": "one👩‍💻two",
+    "cursor": 0,
+    "keys": "2w"
+  },
+  {
+    "name": "edge w 1",
+    "text": "a!👩‍💻z",
+    "cursor": 1,
+    "keys": "w"
+  },
+  {
+    "name": "edge dw 1",
+    "text": "a!👩‍💻z",
+    "cursor": 1,
+    "keys": "dw"
+  },
+  {
+    "name": "host-edge <C-v>jlyp 0",
+    "text": "abc\ndef\nghi",
+    "cursor": 0,
+    "keys": "<C-v>jlyp"
+  },
+  {
+    "name": "host-edge <C-v>jlyP 0",
+    "text": "abc\ndef\nghi",
+    "cursor": 0,
+    "keys": "<C-v>jlyP"
+  },
+  {
+    "name": "host-edge <C-v>jlyG$p 0",
+    "text": "abc\ndef\nghi",
+    "cursor": 0,
+    "keys": "<C-v>jlyG$p"
+  },
+  {
+    "name": "host-edge <C-v>jldj. 0",
+    "text": "abc\ndef\nghi",
+    "cursor": 0,
+    "keys": "<C-v>jldj."
+  },
+  {
+    "name": "host-edge viw<Esc>gv 0",
+    "text": "abc def ghi",
+    "cursor": 0,
+    "keys": "viw<Esc>gv"
+  },
+  {
+    "name": "host-edge viwywgvy 0",
+    "text": "abc def ghi",
+    "cursor": 0,
+    "keys": "viwywgvy"
+  },
+  {
+    "name": "host-edge iab<Left>X<Esc>w. 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "iab<Left>X<Esc>w."
+  },
+  {
+    "name": "host-edge A<Left>X<Right>Y<Esc> 0",
+    "text": "abc",
+    "cursor": 0,
+    "keys": "A<Left>X<Right>Y<Esc>"
+  },
+  {
+    "name": "host-edge dis 0",
+    "text": "one.\n\nTwo.",
+    "cursor": 0,
+    "keys": "dis"
+  },
+  {
+    "name": "host-edge das 0",
+    "text": "one.\n\nTwo.",
+    "cursor": 0,
+    "keys": "das"
+  },
+  {
+    "name": "host-edge 2dis 0",
+    "text": "one.\n\nTwo.",
+    "cursor": 0,
+    "keys": "2dis"
+  },
+  {
+    "name": "host-edge 2das 0",
+    "text": "one.\n\nTwo.",
+    "cursor": 0,
+    "keys": "2das"
+  },
+  {
+    "name": "host-edge w 0",
+    "text": "你好世界 abc",
+    "cursor": 0,
+    "keys": "w"
+  },
+  {
+    "name": "host-edge w 0",
+    "text": "αβγδε abc",
+    "cursor": 0,
+    "keys": "w"
+  },
+  {
+    "name": "host-edge w 0",
+    "text": "👩‍💻🤖z",
+    "cursor": 0,
+    "keys": "w"
+  },
+  {
+    "name": "host-edge ra$l. 0",
+    "text": "abc",
+    "cursor": 0,
+    "keys": "ra$l."
+  },
+  {
+    "name": "host-edge ywyw 0",
+    "text": "one two",
+    "cursor": 0,
+    "keys": "ywyw"
+  },
+  {
+    "name": "host-edge xUu 0",
+    "text": "abc\ndef",
+    "cursor": 0,
+    "keys": "xUu"
+  },
+  {
+    "name": "host-edge qafZxq@a 0",
+    "text": "abc def",
+    "cursor": 0,
+    "keys": "qafZxq@a"
+  },
+  {
+    "name": "host-edge qadZxq@a 0",
+    "text": "abc",
+    "cursor": 0,
+    "keys": "qadZxq@a"
+  }
+]

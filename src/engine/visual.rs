@@ -1,0 +1,82 @@
+//! Visual selection shapes and repeat extents.
+use super::{
+    ByteOffset, Command, DocumentView, EditingState, Mode, ResolvedRange, Selection, Session,
+    Shape, Step, TargetRequest, VisualExtent,
+};
+use crate::MotionResolver;
+
+impl Session {
+    pub(super) fn repeat_visual(
+        &mut self,
+        state: &mut EditingState,
+        command: Command,
+        extent: VisualExtent,
+        view: DocumentView<'_>,
+    ) -> Step {
+        let resolver = MotionResolver::from_view(view);
+        let line = view.text.line_index(view.cursor.0);
+        let last = view.text.line_offset(line + extent.lines.saturating_sub(1));
+        let end = if extent.lines <= 1 {
+            let mut p = view.cursor.0;
+            for _ in 1..extent.columns {
+                p = resolver.next(p).min(view.text.line_end(p));
+            }
+            p
+        } else {
+            resolver.at_column(last, extent.columns.saturating_sub(1))
+        };
+        let selection = Selection {
+            anchor: view.cursor,
+            cursor: ByteOffset(end),
+            shape: extent.shape,
+        };
+        if matches!(extent.shape, Shape::Block { .. }) {
+            return self.resolve_request(state, command, TargetRequest::Block { selection }, view);
+        }
+        self.resolved_command(state, command, selection_range(resolver, selection), view)
+    }
+}
+
+pub(super) fn mode_shape(mode: Mode) -> Shape {
+    match mode {
+        Mode::VisualLine => Shape::Line,
+        Mode::VisualBlock => Shape::Block { width: 1 },
+        _ => Shape::Character,
+    }
+}
+
+pub(super) fn shape_mode(shape: Shape) -> Mode {
+    match shape {
+        Shape::Line => Mode::VisualLine,
+        Shape::Block { .. } => Mode::VisualBlock,
+        _ => Mode::Visual,
+    }
+}
+
+pub(super) fn selection_range(resolver: MotionResolver<'_>, selection: Selection) -> ResolvedRange {
+    if selection.shape == Shape::Line {
+        return resolver.lines(selection.anchor.0, selection.cursor.0);
+    }
+    ResolvedRange::character(
+        selection.anchor.0.min(selection.cursor.0),
+        resolver.next(selection.anchor.0.max(selection.cursor.0)),
+    )
+}
+
+pub(super) fn visual_extent(view: DocumentView<'_>) -> Option<VisualExtent> {
+    let s = view.selection?;
+    let resolver = MotionResolver::from_view(view);
+    let first = s.anchor.0.min(s.cursor.0);
+    let last = s.anchor.0.max(s.cursor.0);
+    let lines = view.text.line_index(last) - view.text.line_index(first) + 1;
+    let columns = if lines == 1 {
+        resolver.column(last) - resolver.column(first) + 1
+    } else {
+        resolver.column(last) + 1
+    };
+    Some(VisualExtent {
+        shape: s.shape,
+        lines,
+        columns,
+    })
+}
