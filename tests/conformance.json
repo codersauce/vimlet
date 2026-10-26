@@ -1635,5 +1635,46 @@
     "name": "block line source before",
     "text": "abc def\nghi jkl\nmno pqr\nstu vwx\nyz",
     "keys": "yyjj<C-v>jlP"
+  },
+  {
+    "name": "delete from host EOL cursor",
+    "text": "hello\nworld",
+    "cursor": 5,
+    "keys": "D"
+  },
+  {
+    "name": "change from host EOL cursor",
+    "text": "hello\nworld",
+    "cursor": 5,
+    "keys": "C"
+  },
+  {
+    "name": "change upward from final empty line",
+    "text": "one\ntwo\n",
+    "cursor": 8,
+    "keys": "ck"
+  },
+  {
+    "name": "backward yank cursor",
+    "text": "abcrdef",
+    "cursor": 3,
+    "keys": "yFb"
+  },
+  {
+    "name": "change till adjacent previous character",
+    "text": "abc",
+    "cursor": 2,
+    "keys": "cTb"
+  },
+  {
+    "name": "replace with a line break",
+    "text": "abc",
+    "cursor": 1,
+    "keys": "r<CR>"
+  },
+  {
+    "name": "counted replace with a single line break",
+    "text": "abcd",
+    "keys": "3r<CR>"
   }
 ]

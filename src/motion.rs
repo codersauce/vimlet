@@ -569,6 +569,10 @@ impl<'a> MotionResolver<'a> {
         count: usize,
         operator: crate::Operator,
     ) -> Option<ResolvedRange> {
+        let cursor = self.normal_cursor(self.cursor);
+        if cursor != self.cursor {
+            return Self { cursor, ..*self }.operator_range(motion, count, operator);
+        }
         let change = operator == crate::Operator::Change;
         if motion == Motion::Right {
             let mut end = self.cursor;
@@ -631,6 +635,18 @@ impl<'a> MotionResolver<'a> {
                 return None;
             }
             return Some(self.lines(self.cursor, target.position.0));
+        }
+        if change
+            && target.position.0 == self.cursor
+            && matches!(
+                motion,
+                Motion::Character {
+                    kind: CharacterMotion::TillBackward,
+                    ..
+                }
+            )
+        {
+            return Some(ResolvedRange::character(self.cursor, self.cursor));
         }
         if !target.inclusive {
             return self.exclusive_range(target.position);

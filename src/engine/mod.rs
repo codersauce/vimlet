@@ -73,6 +73,7 @@ struct BlockInsertion {
 
 #[derive(Debug, Clone)]
 enum InsertEdit {
+    Host(HostCommand),
     Text(String),
     Backspace,
     Delete,
@@ -111,6 +112,7 @@ struct DeletedRegister {
     shape: Shape,
     numbered: bool,
     separator_bytes: usize,
+    ends_on_empty_line: bool,
 }
 
 struct PlannedEdit {
@@ -480,6 +482,11 @@ impl Session {
         });
     }
 
+    /// Forget the dot recipe after a host edit that cannot be repeated at another cursor.
+    pub fn clear_last_change(&mut self) {
+        self.last_change = None;
+    }
+
     /// Report whether dot has a completed change to repeat.
     pub fn has_last_change(&self) -> bool {
         self.last_change.is_some()
@@ -570,6 +577,9 @@ impl Session {
         }
         if matches!(state.mode, Mode::Insert | Mode::Replace) {
             if let Binding::Host(command) = input.binding {
+                if command.repeatable {
+                    return self.insert_action(state, InsertEdit::Host(command), view);
+                }
                 return self.execute(state, Command::new(Action::Host(command), 1), view);
             }
             if let Binding::Command(command) = input.binding {
@@ -785,6 +795,7 @@ impl Session {
                     shape,
                     numbered,
                     separator_bytes: prefix,
+                    ends_on_empty_line,
                 }) = register
                 {
                     let removed_rows = match (shape, visual) {
@@ -803,6 +814,9 @@ impl Session {
                         });
                     if prefix > 0 && text.is_char_boundary(prefix) {
                         text.drain(..prefix);
+                    }
+                    if ends_on_empty_line {
+                        text.push('\n');
                     }
                     if !text.is_empty() || shape == Shape::Line && !edits.is_empty() {
                         self.registers
@@ -823,6 +837,7 @@ impl Session {
                 }
             }
             Effect::Insert(edit) => {
+                let host_edit = matches!(edit, InsertEdit::Host(_));
                 if let Some(active) = &mut state.active {
                     if !edits.is_empty() {
                         let edit = match edit {
@@ -834,7 +849,9 @@ impl Session {
                         active.recipe.tail.push(edit);
                     }
                 }
-                if state.mode == Mode::Replace {
+                if host_edit {
+                    state.replace_recovery.clear();
+                } else if state.mode == Mode::Replace {
                     state.remember_overwrites(&edits);
                 }
                 transform_block_positions(&mut state.block_insert, &edits);

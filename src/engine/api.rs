@@ -211,6 +211,7 @@ pub struct HostCommand {
     /// Stable identifier interpreted by the application.
     pub id: u64,
     /// Whether an accepted host edit can be requested again by dot.
+    /// In an active insertion, report the actual edits to retain this command in its repeat sequence.
     pub repeatable: bool,
 }
 

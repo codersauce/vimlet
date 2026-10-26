@@ -488,3 +488,51 @@ fn externally_committed_change_replaces_the_previous_dot_recipe() {
         }
     );
 }
+
+#[test]
+fn dot_replays_a_host_insert_edit_in_the_same_insertion() {
+    let (mut host, mut session, mut state) = run("abc", "iX");
+    let command = HostCommand {
+        id: 11,
+        repeatable: true,
+    };
+    let mut input = Input::key(Key::Ctrl('w'));
+    input.binding = Binding::Host(command);
+    let Step::HostOperation(request) = session.handle(&mut state, input, host.view()) else {
+        panic!("expected host edit")
+    };
+    let before = host.version;
+    host.text.remove(0);
+    host.cursor = ByteOffset(0);
+    host.version.revision += 1;
+    let result = HostResult {
+        operation: request.id,
+        before,
+        after: host.version,
+        cursor: host.cursor,
+        selection: None,
+        outcome: HostOutcome::Applied {
+            edits: vec![AppliedEdit {
+                range: TextRange::new(0, 1),
+                removed: "X".into(),
+                inserted: String::new(),
+            }],
+            changed: true,
+        },
+    };
+    assert_eq!(
+        session.resume(&mut state, result, host.view()),
+        Step::Consumed
+    );
+    host.keys(&mut session, &mut state, "<Esc>");
+    let mut step = session.handle(&mut state, Input::key(Key::Char('.')), host.view());
+    while let Step::HostOperation(request) = step {
+        if request.kind == (OperationKind::Host { command, count: 1 }) {
+            assert_eq!(host.text, "Xabc");
+            return;
+        }
+        let result = host.execute(request);
+        step = session.resume(&mut state, result, host.view());
+    }
+    panic!("dot ended before the host edit");
+}

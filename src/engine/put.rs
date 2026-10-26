@@ -30,6 +30,7 @@ impl Session {
                 shape: selection.shape,
                 numbered: false,
                 separator_bytes: 0,
+                ends_on_empty_line: false,
             });
         if let Some(selection) = view
             .selection

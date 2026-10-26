@@ -71,6 +71,12 @@ impl Session {
                     .ranges
                     .iter()
                     .map(|r| {
+                        if c == '\n' && !state.mode.is_visual() {
+                            return Replacement {
+                                range: *r,
+                                text: "\n".into(),
+                            };
+                        }
                         let mut text = String::new();
                         let mut p = r.start.0;
                         while p < r.end.0 {
@@ -84,7 +90,9 @@ impl Session {
                         Replacement { range: *r, text }
                     })
                     .collect();
-                let cursor = if !state.mode.is_visual() && c != '\n' {
+                let cursor = if !state.mode.is_visual() && c == '\n' {
+                    ByteOffset(range.ranges[0].start.0 + 1)
+                } else if !state.mode.is_visual() {
                     ByteOffset(range.ranges[0].start.0 + c.len_utf8() * (command.count.max(1) - 1))
                 } else {
                     range.ranges[0].start
@@ -225,6 +233,7 @@ impl Session {
                             shape: range.shape,
                             numbered: false,
                             separator_bytes: 0,
+                            ends_on_empty_line: false,
                         }),
                     },
                 )
@@ -256,7 +265,9 @@ impl Session {
                 });
             self.registers.yank(normalized_register(text, shape));
             state.previous_visual = view.selection.or(state.previous_visual);
-            let cursor = if state.mode.is_visual() {
+            let cursor = if state.mode.is_visual()
+                || shape == Shape::Character && range.ranges[0].start < view.cursor
+            {
                 range.ranges[0].start
             } else {
                 view.cursor
@@ -284,6 +295,11 @@ impl Session {
                 effect,
             );
         }
+        // At EOF the last empty line has no separator of its own.
+        let ends_on_empty_line = shape == Shape::Line
+            && view.cursor.0 == view.text.len_bytes()
+            && view.cursor.0 > 0
+            && view.text.byte_at(view.cursor.0 - 1) == Some(b'\n');
         let mut prefix = 0;
         let case = matches!(
             operator,
@@ -293,7 +309,10 @@ impl Session {
             let r = &mut range.ranges[0];
             if operator == Operator::Change {
                 // Keep the last line ending so the replacement remains a line.
-                if r.end.0 > r.start.0 && view.text.byte_at(r.end.0 - 1) == Some(b'\n') {
+                if !ends_on_empty_line
+                    && r.end.0 > r.start.0
+                    && view.text.byte_at(r.end.0 - 1) == Some(b'\n')
+                {
                     r.end.0 -= 1;
                     if r.end.0 > r.start.0 && view.text.byte_at(r.end.0 - 1) == Some(b'\r') {
                         r.end.0 -= 1;
@@ -372,6 +391,7 @@ impl Session {
                 shape,
                 numbered,
                 separator_bytes: prefix,
+                ends_on_empty_line,
             });
         if operator == Operator::Delete && shape == Shape::Line && prefix == 0 {
             let end = range.ranges[0].end.0;

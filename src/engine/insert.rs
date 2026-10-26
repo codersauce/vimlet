@@ -123,6 +123,18 @@ impl Session {
         let p = view.cursor.0;
         let mut effect = Effect::Insert(action.clone());
         let replacement = match &action {
+            InsertEdit::Host(command) => {
+                state.begin_insert_edit();
+                return self.request(
+                    state,
+                    view,
+                    OperationKind::Host {
+                        command: *command,
+                        count: 1,
+                    },
+                    effect,
+                );
+            }
             InsertEdit::Text(text) => {
                 let mut end = p;
                 if state.mode == Mode::Replace {
@@ -190,25 +202,7 @@ impl Session {
                 }
             }
         };
-        let transaction = if state.active.is_none() {
-            state.active = Some(ActiveChange {
-                recipe: Recipe {
-                    command: Command::new(
-                        Action::Insert(if state.mode == Mode::Replace {
-                            InsertStyle::Replace
-                        } else {
-                            InsertStyle::Before
-                        }),
-                        1,
-                    ),
-                    tail: Vec::new(),
-                    visual: None,
-                },
-            });
-            Transaction::Begin
-        } else {
-            Transaction::Continue
-        };
+        let transaction = state.begin_insert_edit();
         let cursor = if matches!(action, InsertEdit::Backspace | InsertEdit::Delete) {
             replacement.range.start
         } else {
@@ -311,13 +305,35 @@ fn inserted_text(tail: &[InsertEdit]) -> String {
             InsertEdit::Backspace => {
                 text.truncate(text.prev_grapheme(text.len()));
             }
-            InsertEdit::Delete => {}
+            InsertEdit::Delete | InsertEdit::Host(_) => {}
         }
     }
     text
 }
 
 impl EditingState {
+    fn begin_insert_edit(&mut self) -> Transaction {
+        if self.active.is_none() {
+            self.active = Some(ActiveChange {
+                recipe: Recipe {
+                    command: Command::new(
+                        Action::Insert(if self.mode == Mode::Replace {
+                            InsertStyle::Replace
+                        } else {
+                            InsertStyle::Before
+                        }),
+                        1,
+                    ),
+                    tail: Vec::new(),
+                    visual: None,
+                },
+            });
+            Transaction::Begin
+        } else {
+            Transaction::Continue
+        }
+    }
+
     /// Each Backspace unwinds one accepted grapheme, even when the host
     /// acknowledges an entire paste as a single replacement.
     pub(super) fn remember_overwrites(&mut self, edits: &[AppliedEdit]) {
