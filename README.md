@@ -1,34 +1,79 @@
 # Vimlet
 
-Vimlet is a headless Vim editing engine for Rust, extracted from the Red editor. Give it a key and a borrowed document view. It interprets the key, tracks the mode, and returns an operation for the host to apply. Red can enable the optional Ropey adapter. A string-backed application can use the default feature set.
+Vimlet adds Vim editing to Rust applications. Extracted from the Red editor, it interprets keys, manages modes, registers and repeat, and returns operations for your application to apply. Your application keeps its text storage, undo history and UI.
 
-The resolver also works independently of the interpreter.
+Use a plain `String`, implement `TextSource` for your buffer, or enable the optional `ropey` adapter. Vimlet has no dependency on Red or an async runtime. Rust 1.90 or newer is required.
+
+## Try modal editing
+
+From the Vimlet checkout:
+
+```sh
+cargo run --locked --example quickstart
+```
+
+The example executes `cwhello<Esc>w.` on `one two three` and prints:
+
+```text
+hello hello three
+```
+
+The [complete program](examples/quickstart.rs) includes the input loop, string mutation and host acknowledgements. It finishes in Normal mode and runs as a doctest. It supports basic edits and cursor/selection changes; the guides explain how to add history and application services.
+
+## Add Vimlet to your application
+
+Add Vimlet to your application's `Cargo.toml`:
+
+```toml
+[dependencies]
+vimlet = "0.1"
+```
+
+For an application that already uses Ropey:
+
+```toml
+[dependencies]
+vimlet = { version = "0.1", features = ["ropey"] }
+ropey = "1.6.1"
+```
+
+The `ropey` feature supplies text access through `TextSource`. Your application still applies the edits. Applications using other storage do not need Ropey.
+
+## Read the guides
+
+Build and open the documentation from the Vimlet checkout:
+
+```sh
+cargo doc --locked --no-deps --open
+```
+
+The landing page links to three guides inside rustdoc:
+
+- **Quickstart:** dependency setup, a complete editing program, and a walkthrough of `cwhello<Esc>w.`.
+- **Host integration:** event dispatch, byte coordinates, revision checks, undo grouping, services and troubleshooting.
+- **Recipes:** custom mappings, macros, search repeat, composer drafts, storage and display geometry.
+
+Keep one `EditingState` per editing surface and a `Session` for surfaces sharing registers and repeat history. Call `Session::handle` with input and a current `DocumentView`. Apply or reject each host operation, then call `Session::resume` and process its returned step too. All cursor and edit coordinates use UTF-8 bytes.
+
+## Resolve a text object without modal editing
+
+`MotionResolver` also works independently. This complete program finds the word around the space following `hello`:
 
 ```rust
 use vimlet::{ByteOffset, MotionResolver, TextObjectKind, TextObjectScope};
 
-# fn example() -> Option<()> {
-let text = "hello world";
-let resolver = MotionResolver::new(&text, ByteOffset(5));
-let object = resolver.text_object(TextObjectScope::Around, TextObjectKind::Word, 1)?;
-assert_eq!(&text[object.ranges[0].as_range()], " world");
-# Some(())
-# }
-# assert!(example().is_some());
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let text = "hello world";
+    let resolver = MotionResolver::new(&text, ByteOffset(5));
+    let object = resolver
+        .text_object(TextObjectScope::Around, TextObjectKind::Word, 1)
+        .ok_or("no word at the cursor")?;
+    assert_eq!(&text[object.ranges[0].as_range()], " world");
+    Ok(())
+}
 ```
 
-## Integrating an editor
-
-Keep one `EditingState` per editing surface and one `Session` per shared register and repeat scope. Supply `DocumentView` with UTF-8 byte coordinates, a document identity and revision, the cursor, and any Visual selection. An opaque span makes an attachment or placeholder a single motion unit. A host can supply display geometry for tab stops and wide characters.
-
-1. Ask the state for its binding context and resolve the original key through the host's keymap. Call `Session::handle` with both the original key and its binding.
-2. For `Step::HostOperation`, check `operation.is_current(version)` immediately before mutation. Apply replacements against the original revision in descending byte order. Use the transaction phase to group undo and report the actual changes and cursor through `Session::resume`.
-3. For `Step::Replay`, send the key through the host's ordinary dispatch. After the host finishes the key, request the next one with `next_macro_input`. Outstanding operations suspend playback. End the editing context with `lifecycle` when a draft is submitted or replaced.
-4. Use `Step::Unhandled` for application shortcuts. Search prompts, clipboard transport, syntax, undo storage and display layout belong to the host. A search can return a remembered target so dot resolves the saved query at the new cursor.
-
-The string example implements the full dispatch loop and a small undo history. The rope example applies byte ranges directly to a rope. [String host](examples/support/mod.rs) · [Rope host](examples/support/rope.rs)
-
-## Run locally
+## More examples and checks
 
 ```sh
 cargo run --example string
@@ -39,4 +84,6 @@ python3 scripts/conformance.py
 python3 scripts/check_package.py
 ```
 
-Rust 1.90 is the minimum toolchain. The reference runner uses Neovim 0.12.1 and Python 3. It compares actual mapped input, including incomplete commands, and observes text, byte cursor, mode and the unnamed register. The published library only uses Rust dependencies. [Scope and host contracts](docs/EXTRACTION_PLAN.md)
+The [string host](examples/support/mod.rs) demonstrates undo grouping and macro dispatch. The [Ropey host](examples/support/rope.rs) converts byte ranges for rope mutation.
+
+Neovim decides compatibility questions for implemented commands. The reference runner uses Neovim 0.12.1 and Python 3 to compare text, byte cursor, mode and the unnamed register. Vimlet implements modal editing; application services such as search UI, formatting and clipboard transport remain in the host. See the [scope and host contracts](docs/EXTRACTION_PLAN.md).
