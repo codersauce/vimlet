@@ -28,9 +28,10 @@ vimlet = {{ path = "../vimlet-{version}", default-features = false, features = {
 '''
         (consumer / "Cargo.toml").write_text(manifest)
         (consumer / "src/main.rs").write_text('fn main() { let _ = vimlet::Session::new(); }')
-        subprocess.run(["cargo", "run", "--offline"], cwd=consumer, env=env, check=True)
+        subprocess.run(["cargo", "fetch"], cwd=consumer, env=env, check=True)
+        subprocess.run(["cargo", "run", "--frozen"], cwd=consumer, env=env, check=True)
         graph = subprocess.check_output(
-            ["cargo", "tree", "--offline", "-e", "normal,build", "--prefix", "none"],
+            ["cargo", "tree", "--frozen", "-e", "normal,build", "--prefix", "none"],
             cwd=consumer, env=env, text=True)
         packages = {line.split()[0] for line in graph.splitlines()}
         if ("ropey" in packages) != (feature == "ropey") or packages & {"red", "codex-tui"}:
