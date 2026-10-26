@@ -274,16 +274,23 @@ impl Session {
         let n = command.count.max(1);
         let mut start = view.cursor.0;
         let mut end = start;
-        let line_start = view.text.line_start(start);
-        let line_end = view.text.line_end(start);
+        // A counted deletion can cross a line ending hidden inside an opaque span.
+        let limit = (!view.opaque.is_empty()).then(|| {
+            if backward {
+                view.text.line_start(start)
+            } else {
+                view.text.line_end(start)
+            }
+        });
         for _ in 0..n {
             if backward {
-                if start == line_start {
+                if start == 0 || view.text.byte_at(start - 1) == Some(b'\n') || limit == Some(start)
+                {
                     break;
                 }
                 start = resolver.previous(start);
             } else {
-                if end >= line_end {
+                if resolver.at_line_end(end) || limit.is_some_and(|limit| end >= limit) {
                     break;
                 }
                 end = resolver.next(end);
@@ -325,7 +332,7 @@ impl Session {
         }
         let mut end = view.cursor.0;
         for _ in 0..n {
-            if end >= view.text.line_end(end) {
+            if resolver.at_line_end(end) {
                 if matches!(command.action, Action::ReplaceChar(_)) {
                     return Step::Consumed;
                 }

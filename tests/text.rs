@@ -184,6 +184,14 @@ impl TextSource for Counted<'_> {
         (self.text, 0)
     }
 
+    fn line_start(&self, _: usize) -> usize {
+        panic!("local operation scanned to the start of the line");
+    }
+
+    fn line_end(&self, _: usize) -> usize {
+        panic!("local operation scanned to the end of the line");
+    }
+
     fn slice(&self, start: usize, end: usize) -> std::borrow::Cow<'_, str> {
         assert!(end - start < 100, "local motion flattened text");
         std::borrow::Cow::Borrowed(&self.text[start..end])
@@ -203,4 +211,22 @@ fn local_motion_does_not_materialize_a_document() {
         p = resolver.resolve(Motion::Left, 1).unwrap().position.0;
     }
     assert!(source.reads.get() < 1000);
+}
+
+#[test]
+fn local_character_edits_do_not_scan_the_line() {
+    let source = Counted {
+        text: "abcd",
+        reads: Cell::new(0),
+    };
+    let view = DocumentView::new(&source, DocumentVersion::default(), ByteOffset(2));
+    for keys in ["x", "X", "rz", "a"] {
+        let mut state = EditingState::default();
+        let mut session = Session::new();
+        let mut step = Step::Unhandled;
+        for key in keys.chars() {
+            step = session.handle(&mut state, Input::key(Key::Char(key)), view);
+        }
+        assert!(matches!(step, Step::HostOperation(_)), "{keys}");
+    }
 }

@@ -26,9 +26,7 @@ impl Session {
         let mut replacements = Vec::new();
         let cursor = match style {
             InsertStyle::Before | InsertStyle::Replace => view.cursor.0,
-            InsertStyle::After => resolver
-                .next(view.cursor.0)
-                .min(view.text.line_end(view.cursor.0)),
+            InsertStyle::After => resolver.next_on_line(view.cursor.0),
             InsertStyle::FirstNonBlank => resolver.first_non_blank(view.cursor.0),
             InsertStyle::LineEnd => view.text.line_end(view.cursor.0),
             InsertStyle::OpenAbove => {
@@ -89,9 +87,7 @@ impl Session {
                 };
                 let resolver = MotionResolver::from_view(view);
                 let cursor = match key {
-                    Key::Right => resolver
-                        .next(view.cursor.0)
-                        .min(view.text.line_end(view.cursor.0)),
+                    Key::Right => resolver.next_on_line(view.cursor.0),
                     Key::End => view.text.line_end(view.cursor.0),
                     _ => resolver
                         .resolve(motion, 1)
@@ -143,7 +139,7 @@ impl Session {
                         if matches!(g, "\n" | "\r\n") {
                             break;
                         }
-                        if end < view.text.line_end(end) {
+                        if !resolver.at_line_end(end) {
                             end = resolver.next(end);
                         }
                     }

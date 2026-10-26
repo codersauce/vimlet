@@ -235,6 +235,24 @@ impl<'a> MotionResolver<'a> {
         self.span(previous).map_or(previous, |s| s.start.0)
     }
 
+    pub(crate) fn at_line_end(&self, p: usize) -> bool {
+        match self.text.byte_at(p) {
+            None | Some(b'\n') => true,
+            Some(b'\r') => matches!(self.text.byte_at(p + 1), None | Some(b'\n')),
+            _ => false,
+        }
+    }
+
+    pub(crate) fn next_on_line(&self, p: usize) -> usize {
+        if self.at_line_end(p) {
+            p
+        } else if self.span(p).is_some() {
+            self.next(p).min(self.text.line_end(p))
+        } else {
+            self.next(p)
+        }
+    }
+
     pub(crate) fn head(&self, p: usize) -> Option<char> {
         if self.span(p).is_some() {
             Some('\u{fffc}')
