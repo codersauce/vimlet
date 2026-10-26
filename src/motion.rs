@@ -338,6 +338,9 @@ impl<'a> MotionResolver<'a> {
             }
             Motion::Right => {
                 for _ in 0..n {
+                    if matches!(self.head(p), None | Some('\n' | '\r')) {
+                        break;
+                    }
                     let next = self.next(p);
                     if next >= self.text.len_bytes() || matches!(self.head(next), Some('\n' | '\r'))
                     {

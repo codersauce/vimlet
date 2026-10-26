@@ -3,19 +3,12 @@
 //! The host checks the document revision, executes each operation and reports
 //! the resulting edits, cursor and selection.
 mod api;
-
 mod edits;
-
 mod execute;
-
 mod insert;
-
 mod parser;
-
 mod playback;
-
 mod put;
-
 mod visual;
 
 use crate::{
@@ -258,6 +251,7 @@ impl Default for Limits {
     }
 }
 
+#[derive(Debug)]
 struct MacroFrame {
     keys: Vec<Key>,
     index: usize,
@@ -265,7 +259,7 @@ struct MacroFrame {
 }
 
 /// Repeat history, macro playback and registers shared across editing surfaces.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Session {
     registers: Registers,
     last_change: Option<Recipe>,

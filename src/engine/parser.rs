@@ -396,6 +396,9 @@ fn parse_suffix(
             }
             Key::Char('J') if op.is_none() => command(Action::Join { spaces: false }, count),
             Key::Char('v') if op.is_none() => command(Action::Reselect, count),
+            Key::Char('q') if op.is_none() && state.mode.is_visual() => {
+                target(Some(Operator::Format), EditTarget::Selection, count)
+            }
             Key::Char('q') if op.is_none() => {
                 state.pending = Some(Pending::Operator {
                     op: Operator::Format,

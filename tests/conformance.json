@@ -1404,5 +1404,11 @@
     "text": "abc",
     "cursor": 0,
     "keys": "qadZxq@a"
+  },
+  {
+    "name": "right stays on an empty logical line",
+    "text": "abc\n\ndef",
+    "cursor": 4,
+    "keys": "l"
   }
 ]

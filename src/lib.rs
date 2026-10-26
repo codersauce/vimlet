@@ -22,13 +22,9 @@
 #![warn(missing_docs)]
 
 pub mod engine;
-
 pub mod motion;
-
 pub mod registers;
-
 pub mod text;
-
 pub mod types;
 
 pub use engine::{
