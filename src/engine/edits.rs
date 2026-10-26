@@ -1,10 +1,10 @@
 //! Resolve operator ranges and issue transactions.
 use super::visual::visual_extent;
 use super::{
-    normalized_register, transform_block_positions, Action, AppliedEdit, ByteOffset, Command,
-    DeletedRegister, DocumentView, EditTarget, EditingState, Effect, EngineError, Mode,
-    OperationKind, Operator, PlannedEdit, Replacement, ResolvedRange, Selection, Session, Shape,
-    Step, TargetRequest, Transaction,
+    normalized_register, transform_block_positions, Action, AppliedEdit, BlockInsertion,
+    ByteOffset, Command, DeletedRegister, DocumentView, EditTarget, EditingState, Effect,
+    EngineError, Mode, OperationKind, Operator, PlannedEdit, Replacement, ResolvedRange, Selection,
+    Session, Shape, Step, TargetRequest, Transaction,
 };
 use crate::{Motion, MotionResolver};
 
@@ -35,6 +35,27 @@ impl Session {
         match command.action {
             Action::Operate { operator, .. } => {
                 self.edit_operator(state, command, operator, range, view)
+            }
+            Action::SelectTarget(_) => {
+                let first = range.ranges[0].start;
+                let end = range.ranges.last().expect("validated nonempty range").end;
+                let cursor = ByteOffset(if first < end {
+                    resolver.normal_cursor(resolver.previous(end.0))
+                } else {
+                    first.0
+                });
+                let selection = Selection {
+                    anchor: first,
+                    cursor,
+                    shape: range.shape,
+                };
+                self.move_to(
+                    state,
+                    view,
+                    cursor,
+                    super::visual::shape_mode(range.shape),
+                    Some(selection),
+                )
             }
             Action::Target(_) => {
                 let Some(last) = range.ranges.last() else {
@@ -84,14 +105,41 @@ impl Session {
                 self.edit_operator(state, command, Operator::ToggleCase, range, view)
             }
             Action::BlockInsert { append } => {
-                let positions: Vec<_> = range
+                let left = view.selection.map_or_else(
+                    || resolver.column(view.cursor.0),
+                    |s| resolver.column(s.anchor.0).min(resolver.column(s.cursor.0)),
+                );
+                let Shape::Block { width } = range.shape else {
+                    return Step::Error(EngineError::UnexpectedResult);
+                };
+                let first = &range.ranges[0];
+                let cursor = if append { first.end } else { first.start };
+                state.block_origin = Some(first.start);
+                state.block_insert = range
                     .ranges
                     .iter()
-                    .map(|r| if append { r.end } else { r.start })
+                    .skip(1)
+                    .filter_map(|row| {
+                        let end = view.text.line_end(row.start.0);
+                        let columns = resolver.column(end);
+                        if !append && columns < left {
+                            return None;
+                        }
+                        let offset = if append {
+                            row.end
+                        } else if left == columns {
+                            ByteOffset(end)
+                        } else {
+                            row.start
+                        };
+                        let padding = if append {
+                            left.saturating_add(width).saturating_sub(columns)
+                        } else {
+                            0
+                        };
+                        Some(BlockInsertion { offset, padding })
+                    })
                     .collect();
-                let cursor = positions[0];
-                state.block_insert = positions[1..].to_vec();
-                state.block_origin = Some(range.ranges[0].start);
                 self.edit(
                     state,
                     command,
@@ -104,29 +152,80 @@ impl Session {
                     },
                 )
             }
-            Action::Paste { .. } => {
+            // Neovim's dot after a Visual put repeats the removal of the selected extent.
+            Action::Paste { .. } if state.replay_tail.is_some() => {
+                self.edit_operator(state, command, Operator::Delete, range, view)
+            }
+            Action::Paste { before } => {
                 let Some(register) = self.registers.get('"').cloned() else {
                     return Step::Consumed;
                 };
-                let lines: Vec<_> = register.text().lines().collect();
-                let replacements = range
-                    .ranges
-                    .iter()
-                    .zip(lines.iter().cycle())
-                    .map(|(r, text)| Replacement {
-                        range: *r,
-                        text: text.repeat(command.count.max(1)),
-                    })
-                    .collect();
+                let mut replacements = if matches!(register.shape(), Shape::Block { .. }) {
+                    super::put::block_replacements(
+                        view,
+                        range.ranges[0].start.0,
+                        &range.ranges,
+                        register.text(),
+                        command.count,
+                    )
+                } else {
+                    range
+                        .ranges
+                        .iter()
+                        .map(|r| Replacement {
+                            range: *r,
+                            text: if register.shape() == Shape::Line {
+                                String::new()
+                            } else {
+                                register.text().repeat(command.count.max(1))
+                            },
+                        })
+                        .collect()
+                };
+                let mut cursor = range.ranges[0].start;
+                if register.shape() == Shape::Line {
+                    let last = range.ranges.last().expect("nonempty block");
+                    let offset = view.text.next_line(last.end.0);
+                    let removed: usize = range.ranges.iter().map(|r| r.end.0 - r.start.0).sum();
+                    let mut text = register.text().repeat(command.count.max(1));
+                    cursor = ByteOffset(offset - removed);
+                    if offset == view.text.len_bytes()
+                        && view.text.byte_at(offset.saturating_sub(1)) != Some(b'\n')
+                    {
+                        text.insert(0, '\n');
+                        text.pop();
+                        cursor.0 += 1;
+                    }
+                    if before {
+                        let offset = view.text.line_start(range.ranges[0].start.0);
+                        cursor = ByteOffset(offset);
+                        replacements.insert(
+                            0,
+                            Replacement {
+                                range: crate::TextRange::new(offset, offset),
+                                text: register.text().repeat(command.count.max(1)),
+                            },
+                        );
+                    } else {
+                        replacements.push(Replacement {
+                            range: crate::TextRange::new(offset, offset),
+                            text,
+                        });
+                    }
+                }
                 self.edit(
                     state,
                     command,
                     view,
                     PlannedEdit {
                         replacements,
-                        cursor: range.ranges[0].start,
+                        cursor,
                         mode: Mode::Normal,
-                        register: None,
+                        register: (!before).then_some(DeletedRegister {
+                            shape: range.shape,
+                            numbered: false,
+                            separator_bytes: 0,
+                        }),
                     },
                 )
             }
@@ -166,7 +265,7 @@ impl Session {
         }
         if matches!(
             operator,
-            Operator::Indent | Operator::Outdent | Operator::Format
+            Operator::Indent | Operator::Outdent | Operator::Format | Operator::Comment
         ) {
             let effect = Effect::Command {
                 command,
@@ -234,7 +333,15 @@ impl Session {
         }
         if operator == Operator::Change && matches!(shape, Shape::Block { .. }) {
             state.block_origin = Some(range.ranges[0].start);
-            state.block_insert = range.ranges.iter().skip(1).map(|r| r.start).collect();
+            state.block_insert = range
+                .ranges
+                .iter()
+                .skip(1)
+                .map(|r| BlockInsertion {
+                    offset: r.start,
+                    padding: 0,
+                })
+                .collect();
             let removed: Vec<_> = range
                 .ranges
                 .iter()
@@ -260,11 +367,12 @@ impl Session {
                 ..
             }
         );
-        let register = (!case).then_some(DeletedRegister {
-            shape,
-            numbered,
-            separator_bytes: prefix,
-        });
+        let register = (!case && !matches!(command.action, Action::Paste { before: true }))
+            .then_some(DeletedRegister {
+                shape,
+                numbered,
+                separator_bytes: prefix,
+            });
         if operator == Operator::Delete && shape == Shape::Line && prefix == 0 {
             let end = range.ranges[0].end.0;
             cursor.0 += resolver.first_non_blank(end).saturating_sub(end);

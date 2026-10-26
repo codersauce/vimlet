@@ -79,6 +79,8 @@ pub enum Key {
     Home,
     /// Move to the end of the current logical line.
     End,
+    /// A host-specific key identifier retained verbatim for macro playback.
+    Named(String),
     /// A batch of UTF-8 input from a paste or input method.
     Text(String),
 }
@@ -167,6 +169,8 @@ pub enum Operator {
     Indent,
     /// Ask the host to decrease indentation over the target.
     Outdent,
+    /// Ask the host to toggle language-specific comments over the target.
+    Comment,
     /// Ask the host to format the target using its formatting policy.
     Format,
 }
@@ -264,6 +268,8 @@ pub enum EditTarget {
 pub enum Action {
     /// Replay the last successful change. An explicit count replaces its original count.
     Repeat,
+    /// Extend Visual selection to the entire range returned by a host text object.
+    SelectTarget(TargetRequest),
     /// Select a text object using the requested boundaries.
     SelectObject {
         /// Whether to include adjacent whitespace or delimiters.

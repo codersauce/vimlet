@@ -441,3 +441,50 @@ fn host_macro_keys_share_one_budget_across_counts_and_nested_calls() {
     assert_eq!(playback.next_key().unwrap(), Some(4));
     assert_eq!(playback.next_key().unwrap(), None);
 }
+
+#[test]
+fn host_recorded_keys_append_and_play_through_the_shared_register() {
+    let mut session = Session::new();
+    let mut state = EditingState::default();
+    assert_eq!(
+        state.macro_binding(&Key::Char('@'), 3),
+        Some(MacroBinding::AwaitingRegister)
+    );
+    assert_eq!(
+        state.macro_binding(&Key::Char('a'), 0),
+        Some(MacroBinding::Play {
+            register: 'a',
+            count: 3
+        })
+    );
+    session.start_recording('a').unwrap();
+    session.record_key(&Key::Named("<A-x>".into())).unwrap();
+    session.finish_recording();
+    session.start_recording('A').unwrap();
+    session.record_key(&Key::Text("λ".into())).unwrap();
+    session.finish_recording();
+    let keys = vec![Key::Named("<A-x>".into()), Key::Text("λ".into())];
+    assert_eq!(session.macro_keys('a'), Some(keys.clone()));
+    assert_eq!(session.macro_keys('@'), Some(keys));
+}
+
+#[test]
+fn externally_committed_change_replaces_the_previous_dot_recipe() {
+    let (host, mut session, mut state) = run("abc", "x");
+    session.record_host_change(17);
+    let input = Input::key(Key::Char('.'));
+    state.set_count(2);
+    let Step::HostOperation(op) = session.handle(&mut state, input, host.view()) else {
+        panic!("expected an extension request")
+    };
+    assert_eq!(
+        op.kind,
+        OperationKind::Host {
+            command: HostCommand {
+                id: 17,
+                repeatable: true
+            },
+            count: 2
+        }
+    );
+}

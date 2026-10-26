@@ -78,7 +78,12 @@ def main():
     cases=json.loads(args.cases.read_text())
     if not args.record:
         subprocess.run(["cargo","build","--locked","--example","trace"],cwd=ROOT,check=True)
-        result=subprocess.run([str(ROOT/"target/debug/examples/trace")],input="".join(json.dumps(c)+"\n" for c in cases),capture_output=True,text=True,check=True)
+        with tempfile.TemporaryFile(mode="w+") as inputs:
+            for case in cases:
+                print(json.dumps(case), file=inputs)
+            inputs.seek(0)
+            result=subprocess.run([str(ROOT/"target/debug/examples/trace")], stdin=inputs,
+                                  capture_output=True, text=True, check=True, timeout=60)
         actual=[json.loads(line) for line in result.stdout.splitlines()]
         if len(actual)!=len(cases):raise RuntimeError("Driver observation count differs")
     failures=[]

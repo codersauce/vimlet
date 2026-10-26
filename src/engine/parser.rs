@@ -75,7 +75,10 @@ pub(super) fn parse(state: &mut EditingState, key: &Key) -> Parsed {
                     count,
                 )
             } else {
-                state.pending = Some(Pending::Operator { op, count });
+                state.pending = Some(Pending::Operator {
+                    op,
+                    count: explicit_count,
+                });
                 Parsed::Pending
             }
         }
@@ -265,6 +268,14 @@ fn parse_target(
             }
             Motion::RepeatCharacter { kind, character }
         }
+        Key::Char(prefix @ ('[' | ']')) if op.is_some() => {
+            state.pending = Some(Pending::Bracket {
+                prefix: *prefix,
+                op: op?,
+                count: n,
+            });
+            return Some(Parsed::Pending);
+        }
         Key::Char('g') => {
             state.pending = Some(Pending::G { op, count });
             return Some(Parsed::Pending);
@@ -312,6 +323,7 @@ fn parse_suffix(
 ) -> Parsed {
     let count = explicit_count.max(1);
     match pending {
+        Pending::Bracket { .. } => Parsed::Consumed,
         Pending::Record => match key {
             Key::Char(c) => Parsed::Record(*c),
             _ => Parsed::Consumed,
@@ -361,6 +373,7 @@ fn parse_suffix(
             _ => Parsed::Consumed,
         },
         Pending::G { op, count } => match key {
+            Key::Char('q') if op == Some(Operator::Format) => target(op, EditTarget::Lines, count),
             Key::Char('g') => target(op, EditTarget::Motion(Motion::FirstLine), count),
             Key::Char('e' | 'E') => target(
                 op,
@@ -411,7 +424,7 @@ fn parse_suffix(
             op,
             count: operator_count,
         } => {
-            let count = count.saturating_mul(operator_count).min(MAX_COUNT);
+            let count = count.saturating_mul(operator_count.max(1)).min(MAX_COUNT);
             let doubled = matches!(
                 (op, key),
                 (Operator::Delete, Key::Char('d'))
@@ -422,12 +435,13 @@ fn parse_suffix(
                     | (Operator::ToggleCase, Key::Char('~'))
                     | (Operator::Indent, Key::Char('>'))
                     | (Operator::Outdent, Key::Char('<'))
+                    | (Operator::Comment, Key::Char('c'))
                     | (Operator::Format, Key::Char('q'))
             );
             if doubled {
                 return target(Some(op), EditTarget::Lines, count);
             }
-            let count = if operator_count == 1
+            let count = if operator_count == 0
                 && explicit_count == 0
                 && matches!(key, Key::Char('G' | '%'))
             {

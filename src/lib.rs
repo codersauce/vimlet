@@ -79,8 +79,8 @@ pub mod types;
 pub use engine::{
     Action, AppliedEdit, Binding, BindingContext, Capabilities, Command, EditTarget, EditingState,
     EngineError, HistoryCommand, HostCommand, HostOperation, HostOutcome, HostResult, Input,
-    InputOrigin, InsertStyle, Key, Lifecycle, Limits, MacroPlayback, Mode, OperationKind, Operator,
-    Replacement, Session, Step, TargetRequest, Transaction,
+    InputOrigin, InsertStyle, Key, Lifecycle, Limits, MacroBinding, MacroPlayback, Mode,
+    OperationKind, Operator, Replacement, Session, Step, TargetRequest, Transaction,
 };
 pub use motion::{
     CharacterMotion, Motion, MotionResolver, ResolvedRange, Target, TextObjectKind,

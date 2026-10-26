@@ -23,53 +23,42 @@ impl Session {
             return Step::Consumed;
         }
         let resolver = MotionResolver::from_view(view);
-        if matches!(register.shape(), Shape::Block { .. }) && view.selection.is_none() {
-            let first = if before {
+        let register_effect = view
+            .selection
+            .filter(|_| !before)
+            .map(|selection| DeletedRegister {
+                shape: selection.shape,
+                numbered: false,
+                separator_bytes: 0,
+            });
+        if let Some(selection) = view
+            .selection
+            .filter(|s| matches!(s.shape, Shape::Block { .. }))
+        {
+            return self.resolve_request(state, command, TargetRequest::Block { selection }, view);
+        }
+        let selected = view
+            .selection
+            .map(|s| selection_range(resolver, s).ranges[0]);
+        if matches!(register.shape(), Shape::Block { .. })
+            && !view.selection.is_some_and(|s| s.shape == Shape::Line)
+        {
+            let first = if let Some(range) = selected {
+                range.start.0
+            } else if before {
                 view.cursor.0
             } else {
                 resolver
                     .next(view.cursor.0)
                     .min(view.text.line_end(view.cursor.0))
             };
-            let column = resolver.column(first);
-            let mut line = view.text.line_start(first);
-            let mut replacements: Vec<Replacement> = Vec::new();
-            let mut extra_lines = String::new();
-            let mut beyond_eof = false;
-            for row in register.text().split('\n') {
-                let contents = row.repeat(command.count.max(1));
-                if beyond_eof {
-                    extra_lines.push('\n');
-                    extra_lines.push_str(&" ".repeat(column));
-                    extra_lines.push_str(&contents);
-                    continue;
-                }
-                let end = view.text.line_end(line);
-                let end_column = resolver.column(end);
-                let pos = if column >= end_column {
-                    end
-                } else {
-                    resolver.at_column(line, column)
-                };
-                let padding = " ".repeat(column.saturating_sub(end_column));
-                replacements.push(Replacement {
-                    range: TextRange::new(pos, pos),
-                    text: padding + &contents,
-                });
-                beyond_eof = end == view.text.len_bytes();
-                line = view.text.next_line(line);
-            }
-            if !extra_lines.is_empty() {
-                let eof = view.text.len_bytes();
-                if let Some(last) = replacements.last_mut().filter(|r| r.range.start.0 == eof) {
-                    last.text.push_str(&extra_lines);
-                } else {
-                    replacements.push(Replacement {
-                        range: TextRange::new(eof, eof),
-                        text: extra_lines,
-                    });
-                }
-            }
+            let replacements = block_replacements(
+                view,
+                first,
+                selected.as_slice(),
+                register.text(),
+                command.count,
+            );
             return self.edit(
                 state,
                 command,
@@ -78,22 +67,29 @@ impl Session {
                     replacements,
                     cursor: ByteOffset(first),
                     mode: Mode::Normal,
-                    register: None,
+                    register: register_effect,
                 },
             );
         }
         let mut text = register.text().repeat(command.count.max(1));
         let (range, cursor) = if let Some(selection) = view.selection {
-            if matches!(selection.shape, Shape::Block { .. }) {
-                return self.resolve_request(
-                    state,
-                    command,
-                    TargetRequest::Block { selection },
-                    view,
-                );
-            }
-            let range = selection_range(resolver, selection).ranges[0];
-            let cursor = if register.shape() == Shape::Line {
+            let range = selected.expect("selection range");
+            let cursor = if selection.shape == Shape::Line {
+                if !text.ends_with('\n')
+                    && view.text.byte_at(range.end.0.saturating_sub(1)) == Some(b'\n')
+                {
+                    text.push('\n');
+                } else if range.end.0 == view.text.len_bytes()
+                    && view.text.byte_at(range.end.0.saturating_sub(1)) != Some(b'\n')
+                    && text.ends_with('\n')
+                {
+                    text.pop();
+                }
+                range.start.0 + text.len() - text.trim_start_matches([' ', '\t']).len()
+            } else if register.shape() == Shape::Line {
+                text.insert(0, '\n');
+                range.start.0 + 1
+            } else if text.contains('\n') {
                 range.start.0
             } else {
                 range.start.0 + text.prev_grapheme(text.len())
@@ -124,14 +120,13 @@ impl Session {
                     .next(view.cursor.0)
                     .min(view.text.line_end(view.cursor.0))
             };
-            let cursor = p + text.prev_grapheme(text.len());
+            let cursor = if text.contains('\n') {
+                p
+            } else {
+                p + text.prev_grapheme(text.len())
+            };
             (TextRange::new(p, p), ByteOffset(cursor))
         };
-        let register_effect = view.selection.map(|s| DeletedRegister {
-            shape: s.shape,
-            numbered: false,
-            separator_bytes: 0,
-        });
         self.edit(
             state,
             command,
@@ -161,13 +156,14 @@ impl Session {
         });
         let mut end = view.text.line_end(start);
         let mut text = view.text.slice(start, end).into_owned();
-        let cursor = start + text.len();
+        let mut cursor = start + text.len();
         let mut joined = false;
         for _ in 1..count {
             let next = view.text.next_line(end);
             if next <= end || next >= view.text.len_bytes() {
                 break;
             }
+            cursor = start + text.len();
             end = view.text.line_end(next);
             let source = view.text.slice(next, end);
             let source = if spaces {
@@ -204,4 +200,63 @@ impl Session {
             },
         )
     }
+}
+
+pub(super) fn block_replacements(
+    view: DocumentView<'_>,
+    first: usize,
+    ranges: &[TextRange],
+    text: &str,
+    count: usize,
+) -> Vec<Replacement> {
+    let resolver = MotionResolver::from_view(view);
+    let column = resolver.column(first);
+    let mut line = Some(view.text.line_start(first));
+    let mut rows = text.split('\n').peekable();
+    let mut replacements: Vec<Replacement> = Vec::new();
+    let mut extra = String::new();
+    for index in 0.. {
+        let selected = ranges.get(index).copied();
+        if rows.peek().is_none() && selected.is_none() {
+            break;
+        }
+        let row = rows.next().unwrap_or("").repeat(count.max(1));
+        let Some(start) = line else {
+            extra.push('\n');
+            extra.push_str(&" ".repeat(column));
+            extra.push_str(&row);
+            continue;
+        };
+        let end = view.text.line_end(start);
+        let end_column = resolver.column(end);
+        let pos = if column >= end_column {
+            end
+        } else {
+            resolver.at_column(start, column)
+        };
+        let range = selected.unwrap_or(TextRange::new(pos, pos));
+        let padding = if row.is_empty() {
+            0
+        } else {
+            column.saturating_sub(end_column)
+        };
+        replacements.push(Replacement {
+            range,
+            text: " ".repeat(padding) + &row,
+        });
+        line = (view.text.line_end(range.end.0) < view.text.len_bytes())
+            .then(|| view.text.next_line(range.end.0));
+    }
+    if !extra.is_empty() {
+        let eof = view.text.len_bytes();
+        if let Some(last) = replacements.last_mut().filter(|r| r.range.end.0 == eof) {
+            last.text.push_str(&extra);
+        } else {
+            replacements.push(Replacement {
+                range: TextRange::new(eof, eof),
+                text: extra,
+            });
+        }
+    }
+    replacements
 }

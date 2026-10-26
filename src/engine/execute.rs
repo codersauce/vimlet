@@ -128,7 +128,9 @@ impl Session {
                 },
                 Effect::History,
             ),
-            Action::Target(request) => self.resolve_request(state, command, request, view),
+            Action::Target(request) | Action::SelectTarget(request) => {
+                self.resolve_request(state, command, request, view)
+            }
             Action::Host(host) => {
                 let effect = if host.repeatable {
                     Effect::Command {

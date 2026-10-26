@@ -1,6 +1,6 @@
 # Standalone extraction
 
-Milestones 1–4 establish the independent crate that Red and Codex will consume. The next integration is Red's embedded textarea and main editor. Codex follows once the Red integration passes its tests. Both consumers must qualify the same revision before release.
+Milestones 1–4 establish the independent crate that Red and Codex will consume. Red consumes Vimlet in its embedded textarea and file editor. Codex follows once Red passes its integration gate. Both consumers must qualify the same revision before release.
 
 | Milestone | Delivered surface | Verification |
 | --- | --- | --- |
@@ -11,11 +11,23 @@ Milestones 1–4 establish the independent crate that Red and Codex will consume
 
 ## Command coverage
 
-The resolver handles logical `h j k l`, line starts and ends, word and WORD starts and ends in both directions, line and percentage jumps, single-character find and till with repeat, delimiter matching, paragraphs and sentences. Text objects cover words, WORDs, paragraphs, sentences, balanced parentheses, brackets and braces, and quoted strings.
+The resolver handles logical `h j k l`, line starts and ends, word and WORD starts and ends in both directions, line and percentage jumps, single-character find and till with repeat, delimiter matching, paragraphs and sentences. Text objects cover words, WORDs, paragraphs, sentences, balanced parentheses, brackets, braces and angle brackets, and quoted strings.
 
 The interpreter composes motions with delete, change, yank and case operators. It supports line forms, insert and append, opening lines, single-character and continuous replacement, puts, joins, Visual selection and block editing. Explicit register inspection and replacement are available through the session. Macro names accept letters and digits, uppercase recording appends, and automatic yank and numbered delete updates use the same register bank.
 
 Neovim decides shared behavior. An accepted empty Insert session can become the last change. A failed change target cancels the insertion tail of dot. The conformance corpus includes both behaviors. [Reference cases](../tests/conformance.json)
+
+## Red compatibility
+
+| Input | Behavior checked against Neovim |
+| --- | --- |
+| `i<Esc>` inside a line | The Normal cursor moves back one character, even when the user inserted nothing. |
+| `da"` | The object includes following whitespace when available and otherwise consumes adjacent preceding whitespace. |
+| Visual-block `I` and `A` | Insert skips rows shorter than the left edge. Append pads short rows to the block edge. |
+| Visual `p` and `P` | The source register and selection shape determine the inserted rows. Lowercase put captures replaced text. Uppercase put preserves the source. |
+| Linewise registers | Their text ends in a newline, including when the original final line had no terminator. |
+
+Red resolves window and screen coordinates, language-specific indentation, marks, searches and syntax queries. It applies Vimlet edits through its buffer and undo system. Plugin actions can suspend a macro. Red validates the buffer and revision before it resumes playback.
 
 ## Host contracts
 

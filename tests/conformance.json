@@ -1500,5 +1500,140 @@
     "name": "block delete repeat at earlier column",
     "text": "abcdefg\nABCDEFG\n1234567\nzyxwvut",
     "keys": "ll<C-v>jldjj0."
+  },
+  {
+    "name": "around quote absorbs preceding whitespace",
+    "text": "let s = \"hello\";",
+    "keys": "da\"",
+    "cursor": 10
+  },
+  {
+    "name": "angle bracket text object",
+    "text": "Option<alpha>",
+    "keys": "di>",
+    "cursor": 8
+  },
+  {
+    "text": "a\nb\nc\nd",
+    "keys": "<C-v>jIpqr<Esc>jj."
+  },
+  {
+    "text": "a\nb\nc\nd",
+    "keys": "<C-v>jApqr<Esc>"
+  },
+  {
+    "text": "ab\nc\ndef",
+    "keys": "l<C-v>jjIX<Esc>"
+  },
+  {
+    "text": "ab\nc\ndef",
+    "keys": "l<C-v>jjAX<Esc>"
+  },
+  {
+    "text": "abcd\nefgh",
+    "keys": "3rXj."
+  },
+  {
+    "text": "abc",
+    "cursor": 1,
+    "keys": "i<Esc>"
+  },
+  {
+    "text": "one\n  two\n    three\nfour",
+    "keys": "3J"
+  },
+  {
+    "text": "one\n  two\n    three\nfour",
+    "keys": "VjjJ"
+  },
+  {
+    "name": "Visual text put text",
+    "text": "abc\ndef\nghi\njkl\nmno",
+    "keys": "yljj0vlp"
+  },
+  {
+    "name": "Visual lines put text",
+    "text": "abc\ndef\nghi\njkl\nmno",
+    "keys": "yljj0Vp"
+  },
+  {
+    "name": "Visual block put text",
+    "text": "abc\ndef\nghi\njkl\nmno",
+    "keys": "yljj0<C-v>jlp"
+  },
+  {
+    "name": "Visual text put lines",
+    "text": "abc\ndef\nghi\njkl\nmno",
+    "keys": "yyjj0vlp"
+  },
+  {
+    "name": "Visual lines put lines",
+    "text": "abc\ndef\nghi\njkl\nmno",
+    "keys": "yyjj0Vp"
+  },
+  {
+    "name": "Visual block put lines",
+    "text": "abc\ndef\nghi\njkl\nmno",
+    "keys": "yyjj0<C-v>jlp"
+  },
+  {
+    "name": "Visual text put block",
+    "text": "abc\ndef\nghi\njkl\nmno",
+    "keys": "<C-v>jlyjj0vlp"
+  },
+  {
+    "name": "Visual lines put block",
+    "text": "abc\ndef\nghi\njkl\nmno",
+    "keys": "<C-v>jlyjj0Vp"
+  },
+  {
+    "name": "Visual block put block",
+    "text": "abc\ndef\nghi\njkl\nmno",
+    "keys": "<C-v>jlyjj0<C-v>jlp"
+  },
+  {
+    "name": "Visual P preserves source",
+    "text": "abc def",
+    "keys": "ylwvlP"
+  },
+  {
+    "name": "explicit one percent operator",
+    "text": "one\ntwo\nthree",
+    "keys": "G1d%"
+  },
+  {
+    "name": "characterwise multiline put cursor",
+    "text": "alpha beta\n\nnext line",
+    "keys": "wy2wp"
+  },
+  {
+    "name": "block source taller than selection",
+    "text": "abc def\nghi jkl\nmno pqr\nstu vwx\nyz",
+    "keys": "<C-v>jjlyj<C-v>lp"
+  },
+  {
+    "name": "block source shorter than selection",
+    "text": "abc def\nghi jkl\nmno pqr\nstu vwx\nyz",
+    "keys": "<C-v>lyjj<C-v>jlp"
+  },
+  {
+    "name": "visual paste dot",
+    "text": "abc def\nghi jkl\nmno pqr\nstu vwx\nyz",
+    "keys": "ylwvlpw."
+  },
+  {
+    "name": "visual line paste dot",
+    "text": "abc def\nghi jkl\nmno pqr\nstu vwx\nyz",
+    "keys": "yyjVpj."
+  },
+  {
+    "name": "visual block source after eof",
+    "text": "abc def\nghi jkl\nmno pqr\nstu vwx\nyz",
+    "keys": "<C-v>jjlyG<C-v>lp"
+  },
+  {
+    "name": "block line source before",
+    "text": "abc def\nghi jkl\nmno pqr\nstu vwx\nyz",
+    "keys": "yyjj<C-v>jlP"
   }
 ]

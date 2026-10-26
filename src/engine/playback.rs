@@ -125,6 +125,24 @@ impl Session {
         step
     }
 
+    /// Select a register for external playback and return its original keys.
+    ///
+    /// An `@` name reuses the last successfully selected register. Empty or missing registers
+    /// return `None` and preserve that name. Feed the keys to the host's bounded dispatcher.
+    pub fn macro_keys(&mut self, name: char) -> Option<Vec<super::Key>> {
+        let name = if name == '@' {
+            self.last_macro?
+        } else {
+            name.to_ascii_lowercase()
+        };
+        let keys = self.registers.get(name)?.playback();
+        if keys.is_empty() {
+            return None;
+        }
+        self.last_macro = Some(name);
+        Some(keys)
+    }
+
     pub(super) fn play(
         &mut self,
         state: &EditingState,
@@ -132,22 +150,10 @@ impl Session {
         count: usize,
         view: DocumentView<'_>,
     ) -> Step {
-        let name = if name == '@' {
-            let Some(name) = self.last_macro else {
-                return Step::Consumed;
-            };
-            name
-        } else {
-            name
-        };
-        let Some(register) = self.registers.get(name) else {
+        let Some(keys) = self.macro_keys(name) else {
             self.cancel_playback();
             return Step::Consumed;
         };
-        let keys = register.playback();
-        if keys.is_empty() {
-            return Step::Consumed;
-        }
         if !self.playback.is_playing() {
             self.macro_document = Some(view.version.id);
         }
@@ -155,7 +161,6 @@ impl Session {
             self.macro_document = None;
             return Step::Error(error);
         }
-        self.last_macro = Some(name);
         self.next_macro_input(state, view.version)
     }
 

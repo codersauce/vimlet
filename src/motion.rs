@@ -60,6 +60,10 @@ impl TextObjectKind {
                 open: '(',
                 close: ')',
             },
+            '<' | '>' => Self::Delimited {
+                open: '<',
+                close: '>',
+            },
             '[' | ']' => Self::Delimited {
                 open: '[',
                 close: ']',

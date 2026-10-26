@@ -270,8 +270,8 @@ impl Session {
             if !text.is_empty() {
                 for p in &state.block_insert {
                     replacements.push(Replacement {
-                        range: TextRange::new(p.0, p.0),
-                        text: text.clone(),
+                        range: TextRange::new(p.offset.0, p.offset.0),
+                        text: format!("{}{text}", " ".repeat(p.padding)),
                     });
                 }
             }

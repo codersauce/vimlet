@@ -32,6 +32,11 @@ enum Pending {
         op: Operator,
         count: usize,
     },
+    Bracket {
+        prefix: char,
+        op: Operator,
+        count: usize,
+    },
     G {
         op: Option<Operator>,
         count: usize,
@@ -58,6 +63,12 @@ enum Pending {
         linewise: bool,
         count: usize,
     },
+}
+
+#[derive(Debug, Clone)]
+struct BlockInsertion {
+    offset: ByteOffset,
+    padding: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -135,6 +146,24 @@ struct Awaiting {
     effect: Effect,
 }
 
+/// A macro binding interpreted for a host that dispatches its own recorded keys.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MacroBinding {
+    /// A prefix was consumed and the next key names the register.
+    AwaitingRegister,
+    /// Start recording into this register. Uppercase appends.
+    Record(char),
+    /// Dispatch the named register the requested number of times.
+    Play {
+        /// The typed name, including `@` for the last played register.
+        register: char,
+        /// Repetition count, at least one.
+        count: usize,
+    },
+    /// Escape or an invalid suffix ended the pending binding.
+    Cancelled,
+}
+
 /// Modal state and pending commands for one editing surface.
 ///
 /// Keep the same state until the host acknowledges any outstanding operation.
@@ -151,7 +180,7 @@ pub struct EditingState {
     active: Option<ActiveChange>,
     replay_tail: Option<VecDeque<InsertEdit>>,
     replace_recovery: Vec<ReplaceRecovery>,
-    block_insert: Vec<ByteOffset>,
+    block_insert: Vec<BlockInsertion>,
     block_origin: Option<ByteOffset>,
     document: Option<u64>,
 }
@@ -199,6 +228,106 @@ impl EditingState {
     /// Report whether a prefix, count or host acknowledgement is outstanding.
     pub fn has_pending_input(&self) -> bool {
         self.pending.is_some() || self.count.is_some() || self.awaiting.is_some()
+    }
+
+    /// Supply a count already consumed by a host keymap. Zero clears the count.
+    pub fn set_count(&mut self, count: usize) {
+        self.count = (count > 0).then_some(count.min(MAX_COUNT));
+    }
+
+    /// Start a mapped operator and wait for its motion or text object.
+    ///
+    /// Zero denotes an omitted count. Further count digits multiply a supplied count.
+    /// Call on an idle Normal surface.
+    pub fn begin_operator(&mut self, operator: Operator, count: usize) {
+        self.count = None;
+        self.pending = Some(Pending::Operator {
+            op: operator,
+            count: count.min(MAX_COUNT),
+        });
+    }
+
+    /// Report whether the next key names a macro recording or playback register.
+    pub fn awaiting_macro_register(&self) -> bool {
+        matches!(self.pending, Some(Pending::Record | Pending::Play { .. }))
+    }
+
+    /// Interpret a Normal-mode macro key for an external playback dispatcher.
+    ///
+    /// Supply any mapped count with the prefix. Unrelated input leaves the surface untouched.
+    pub fn macro_binding(&mut self, key: &Key, count: usize) -> Option<MacroBinding> {
+        if !self.awaiting_macro_register() {
+            if self.mode != Mode::Normal
+                || self.has_pending_input()
+                || !matches!(key, Key::Char('q' | '@'))
+            {
+                return None;
+            }
+            self.set_count(count);
+        }
+        Some(match parser::parse(self, key) {
+            parser::Parsed::Pending => MacroBinding::AwaitingRegister,
+            parser::Parsed::Record(name) => MacroBinding::Record(name),
+            parser::Parsed::Play(register, count) => MacroBinding::Play { register, count },
+            _ => MacroBinding::Cancelled,
+        })
+    }
+
+    /// Report whether an operator or its motion has a count that changes a percentage target.
+    pub fn has_motion_count(&self) -> bool {
+        self.count.is_some() || matches!(self.pending, Some(Pending::Operator { count: 1.., .. }))
+    }
+
+    /// Return the prefix for a host-defined motion or text-object suffix.
+    pub fn target_prefix(&self) -> Option<char> {
+        match self.pending {
+            Some(Pending::Object {
+                scope: crate::TextObjectScope::Inner,
+                ..
+            }) => Some('i'),
+            Some(Pending::Object { .. }) => Some('a'),
+            Some(Pending::Bracket { prefix, .. }) => Some(prefix),
+            Some(Pending::G { .. }) => Some('g'),
+            _ => None,
+        }
+    }
+
+    /// Return the semantic command behind the outstanding host edit, including dot playback.
+    ///
+    /// Hosts can use the action to apply language-specific indentation when opening or pasting lines.
+    pub fn pending_edit_command(&self) -> Option<&Command> {
+        match &self.awaiting.as_ref()?.effect {
+            Effect::Command { command, .. } => Some(command),
+            _ => None,
+        }
+    }
+
+    /// Return the last character search for host commands that share `;` and `,` history.
+    pub fn last_character_motion(&self) -> Option<(CharacterMotion, char)> {
+        self.last_character
+    }
+
+    /// Synchronize a host-initiated mode change on the same document.
+    ///
+    /// Discard transient input and keep the document's character search and Visual selection.
+    /// Finish any pending edit or undo group before switching modes.
+    pub fn sync_mode(&mut self, mode: Mode) {
+        if self.mode != mode {
+            *self = Self {
+                document: self.document,
+                last_character: self.last_character,
+                previous_visual: self.previous_visual,
+                ..Self::new(mode, self.capabilities)
+            };
+        }
+    }
+
+    /// Return the character motion awaiting a literal target, if any.
+    pub fn pending_character_motion(&self) -> Option<CharacterMotion> {
+        match self.pending {
+            Some(Pending::Character { kind, .. }) => Some(kind),
+            _ => None,
+        }
     }
 
     /// Tell the host whether Escape belongs to this editing surface.
@@ -293,9 +422,62 @@ impl Session {
         self.recording.as_ref().map(|r| r.0)
     }
 
+    /// Start recording original keys into an alphanumeric register. Uppercase appends on finish.
+    ///
+    /// # Errors
+    /// Returns [`EngineError::InvalidRegister`] when the register cannot hold a macro.
+    pub fn start_recording(&mut self, name: char) -> Result<(), EngineError> {
+        if !name.is_ascii_alphanumeric() {
+            return Err(EngineError::InvalidRegister);
+        }
+        self.recording = Some((name, Vec::new()));
+        Ok(())
+    }
+
+    /// Record one original key dispatched outside the interpreter.
+    ///
+    /// Use [`InputOrigin::Injected`] if subsequently feeding the same key to [`Self::handle`].
+    ///
+    /// # Errors
+    /// Exceeding the recording limit discards the unfinished recording.
+    pub fn record_key(&mut self, key: &Key) -> Result<(), EngineError> {
+        if let Some((_, keys)) = &mut self.recording {
+            if keys.len() >= self.playback.limits.recorded_keys {
+                self.recording = None;
+                return Err(EngineError::RecordingLimit);
+            }
+            keys.push(key.clone());
+        }
+        Ok(())
+    }
+
+    /// Commit the recording to the shared register bank and return its lowercase name.
+    pub fn finish_recording(&mut self) -> Option<char> {
+        let (name, keys) = self.recording.take()?;
+        self.registers.set(name, Register::from_keys(keys));
+        Some(name.to_ascii_lowercase())
+    }
+
     /// Report whether playback frames remain on the dispatch stack.
     pub fn is_playing(&self) -> bool {
         self.playback.is_playing()
+    }
+
+    /// Remember a host command after its independently dispatched edit commits.
+    ///
+    /// Dot emits an [`OperationKind::Host`] request with this identifier and the repeat count.
+    pub fn record_host_change(&mut self, id: u64) {
+        self.last_change = Some(Recipe {
+            command: Command::new(
+                Action::Host(HostCommand {
+                    id,
+                    repeatable: true,
+                }),
+                1,
+            ),
+            tail: Vec::new(),
+            visual: None,
+        });
     }
 
     /// Report whether dot has a completed change to repeat.
@@ -367,19 +549,13 @@ impl Session {
             && state.mode == Mode::Normal
             && !state.has_pending_input()
             && input.origin == InputOrigin::Typed
+            && self.finish_recording().is_some()
         {
-            if let Some((name, keys)) = self.recording.take() {
-                self.registers.set(name, Register::from_keys(keys));
-                return Step::Consumed;
-            }
+            return Step::Consumed;
         }
         if input.origin == InputOrigin::Typed {
-            if let Some((_, keys)) = &mut self.recording {
-                if keys.len() >= self.playback.limits.recorded_keys {
-                    self.recording = None;
-                    return Step::Error(EngineError::RecordingLimit);
-                }
-                keys.push(input.key.clone());
+            if let Err(error) = self.record_key(&input.key) {
+                return Step::Error(error);
             }
         }
         if input.key == Key::Escape {
@@ -403,6 +579,32 @@ impl Session {
                 return Step::Unhandled;
             }
             return self.insert_key(state, input.key, view);
+        }
+        if let Binding::Command(Command {
+            action: Action::Target(request),
+            ..
+        }) = input.binding
+        {
+            let scoped = match state.pending {
+                Some(Pending::Object { op, count, .. } | Pending::G { op, count }) => {
+                    Some((op, count))
+                }
+                Some(Pending::Bracket { op, count, .. }) => Some((Some(op), count)),
+                _ => None,
+            };
+            if let Some((operator, count)) = scoped {
+                let object = matches!(state.pending, Some(Pending::Object { .. }));
+                state.pending = None;
+                let action = match operator {
+                    Some(operator) => Action::Operate {
+                        operator,
+                        target: EditTarget::Host(request),
+                    },
+                    None if object => Action::SelectTarget(request),
+                    None => Action::Target(request),
+                };
+                return self.execute(state, Command::new(action, count), view);
+            }
         }
         // Motion mappings complete an operator. Literal suffixes (e.g. the
         // character after f) are deliberately interpreted as the original key.
@@ -460,8 +662,8 @@ impl Session {
                 if input.origin == InputOrigin::Macro {
                     return Step::Consumed;
                 }
-                self.recording = Some((name, Vec::new()));
-                Step::Consumed
+                self.start_recording(name)
+                    .map_or_else(Step::Error, |()| Step::Consumed)
             }
             parser::Parsed::Play(name, count) => self.play(state, name, count, view),
             parser::Parsed::Escape => {
@@ -541,6 +743,7 @@ impl Session {
                             target: EditTarget::Host(replay),
                         },
                         Action::Target(_) => Action::Target(replay),
+                        Action::SelectTarget(_) => Action::SelectTarget(replay),
                         _ => return Step::Error(EngineError::UnexpectedResult),
                     };
                     (Command::new(action, command.count), range)
@@ -584,8 +787,13 @@ impl Session {
                     separator_bytes: prefix,
                 }) = register
                 {
+                    let removed_rows = match (shape, visual) {
+                        (Shape::Block { .. }, Some(extent)) => extent.lines,
+                        _ => edits.len(),
+                    };
                     let mut text = edits
                         .iter()
+                        .take(removed_rows)
                         .map(|e| e.removed.as_str())
                         .collect::<Vec<_>>()
                         .join(if matches!(shape, Shape::Block { .. }) {
@@ -673,14 +881,14 @@ fn normalized_register(mut text: String, shape: Shape) -> Register {
     Register::from_text(text, shape)
 }
 
-fn transform_block_positions(positions: &mut [ByteOffset], edits: &[AppliedEdit]) {
+fn transform_block_positions(positions: &mut [BlockInsertion], edits: &[AppliedEdit]) {
     for p in positions {
         let mut delta = 0isize;
         for e in edits {
-            if e.range.end <= *p {
+            if e.range.end <= p.offset {
                 delta += e.inserted.len() as isize - (e.range.end.0 - e.range.start.0) as isize;
             }
         }
-        p.0 = p.0.saturating_add_signed(delta);
+        p.offset.0 = p.offset.0.saturating_add_signed(delta);
     }
 }

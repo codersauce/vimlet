@@ -53,9 +53,15 @@ impl Register {
 pub struct Registers {
     values: BTreeMap<char, Register>,
     unnamed: Option<char>,
+    unnamed_revision: u64,
 }
 
 impl Registers {
+    /// Return a change counter for clipboard synchronization, including repeated identical yanks.
+    pub fn unnamed_revision(&self) -> u64 {
+        self.unnamed_revision
+    }
+
     /// Look up a register by name, following the unnamed alias and folding uppercase to lowercase.
     pub fn get(&self, name: char) -> Option<&Register> {
         let name = if name == '"' {
@@ -100,15 +106,20 @@ impl Registers {
         if name == '"' {
             self.unnamed = Some('"');
         }
+        if self.unnamed == Some(lower) {
+            self.unnamed_revision = self.unnamed_revision.wrapping_add(1);
+        }
         true
     }
 
     pub(crate) fn yank(&mut self, value: Register) {
+        self.unnamed_revision = self.unnamed_revision.wrapping_add(1);
         self.values.insert('0', value);
         self.unnamed = Some('0');
     }
 
     pub(crate) fn delete(&mut self, value: Register, numbered: bool) {
+        self.unnamed_revision = self.unnamed_revision.wrapping_add(1);
         if numbered || value.shape != Shape::Character || value.text.contains('\n') {
             for n in (2..=9).rev() {
                 let previous = char::from(b'0' + n - 1);
@@ -142,7 +153,7 @@ fn text_key(c: char) -> Key {
 fn key_text(key: &Key) -> String {
     match key {
         Key::Char(c) => c.to_string(),
-        Key::Text(s) => s.clone(),
+        Key::Text(s) | Key::Named(s) => s.clone(),
         Key::Escape => "\u{1b}".into(),
         Key::Enter => "\n".into(),
         Key::Backspace => "\u{8}".into(),
