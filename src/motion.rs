@@ -628,18 +628,25 @@ impl<'a> MotionResolver<'a> {
             }
             return Some(self.lines(self.cursor, target.position.0));
         }
-        let (mut start, mut end) = (
-            self.cursor.min(target.position.0),
-            self.cursor.max(target.position.0),
-        );
-        if target.inclusive {
-            end = self.next(end);
+        if !target.inclusive {
+            return self.exclusive_range(target.position);
         }
-        if !target.inclusive && end > start && self.text.line_start(end) == end {
+        let start = self.cursor.min(target.position.0);
+        let end = self.next(self.cursor.max(target.position.0));
+        (start < end).then(|| ResolvedRange::character(start, end))
+    }
+
+    /// Convert a host-resolved exclusive motion into an operator range.
+    ///
+    /// A motion ending in column zero on another line becomes linewise when it starts
+    /// at or before the first nonblank. Otherwise it leaves the final line ending intact.
+    pub fn exclusive_range(&self, target: ByteOffset) -> Option<ResolvedRange> {
+        let start = self.cursor.min(target.0);
+        let mut end = self.cursor.max(target.0);
+        if end > start && self.text.line_start(end) == end {
             if start <= self.first_non_blank(start) {
-                start = self.text.line_start(start);
                 return Some(ResolvedRange {
-                    ranges: vec![TextRange::new(start, end)],
+                    ranges: vec![TextRange::new(self.text.line_start(start), end)],
                     shape: Shape::Line,
                 });
             }

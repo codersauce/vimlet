@@ -1480,5 +1480,15 @@
     "name": "one empty line op",
     "text": "\n",
     "keys": "dw"
+  },
+  {
+    "name": "block delete repeat at another column",
+    "text": "abcdefg\nABCDEFG\n1234567\nzyxwvut",
+    "keys": "<C-v>jldjjll."
+  },
+  {
+    "name": "block delete repeat at earlier column",
+    "text": "abcdefg\nABCDEFG\n1234567\nzyxwvut",
+    "keys": "ll<C-v>jldjj0."
   }
 ]

@@ -262,6 +262,8 @@ pub enum EditTarget {
 /// Semantic command retained for repeat independently of key mappings.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Action {
+    /// Replay the last successful change. An explicit count replaces its original count.
+    Repeat,
     /// Select a text object using the requested boundaries.
     SelectObject {
         /// Whether to include adjacent whitespace or delimiters.

@@ -10,7 +10,6 @@ pub(super) enum Parsed {
     Pending,
     Consumed,
     Unhandled,
-    Repeat(usize),
     Record(char),
     Play(char, usize),
     Escape,
@@ -185,7 +184,7 @@ pub(super) fn parse(state: &mut EditingState, key: &Key) -> Parsed {
         Key::Char('u') => command(Action::History(HistoryCommand::Undo), count),
         Key::Char('U') => command(Action::History(HistoryCommand::UndoLine), count),
         Key::Ctrl('r') => command(Action::History(HistoryCommand::Redo), count),
-        Key::Char('.') => Parsed::Repeat(explicit_count),
+        Key::Char('.') => command(Action::Repeat, explicit_count),
         Key::Char('q') => {
             state.pending = Some(Pending::Record);
             Parsed::Pending

@@ -36,6 +36,7 @@ impl Session {
             state.preferred_column = None;
         }
         match command.action {
+            Action::Repeat => self.repeat(state, command.count, view),
             Action::Move(motion) => self.move_cursor(state, view, motion, command.count),
             Action::Visual(shape) => {
                 let mode = shape_mode(shape);

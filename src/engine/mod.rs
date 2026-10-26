@@ -462,7 +462,6 @@ impl Session {
                 Step::Consumed
             }
             parser::Parsed::Unhandled => Step::Unhandled,
-            parser::Parsed::Repeat(count) => self.repeat(state, count, view),
             parser::Parsed::Record(name) => {
                 if !name.is_ascii_alphanumeric() {
                     return Step::Error(EngineError::InvalidRegister);

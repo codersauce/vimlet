@@ -16,7 +16,12 @@ impl Session {
         let resolver = MotionResolver::from_view(view);
         let line = view.text.line_index(view.cursor.0);
         let last = view.text.line_offset(line + extent.lines.saturating_sub(1));
-        let end = if extent.lines <= 1 {
+        let end = if matches!(extent.shape, Shape::Block { .. }) {
+            resolver.at_column(
+                last,
+                resolver.column(view.cursor.0) + extent.columns.saturating_sub(1),
+            )
+        } else if extent.lines <= 1 {
             let mut p = view.cursor.0;
             for _ in 1..extent.columns {
                 p = resolver.next(p).min(view.text.line_end(p));
@@ -69,7 +74,9 @@ pub(super) fn visual_extent(view: DocumentView<'_>) -> Option<VisualExtent> {
     let first = s.anchor.0.min(s.cursor.0);
     let last = s.anchor.0.max(s.cursor.0);
     let lines = view.text.line_index(last) - view.text.line_index(first) + 1;
-    let columns = if lines == 1 {
+    let columns = if matches!(s.shape, Shape::Block { .. }) {
+        resolver.column(first).abs_diff(resolver.column(last)) + 1
+    } else if lines == 1 {
         resolver.column(last) - resolver.column(first) + 1
     } else {
         resolver.column(last) + 1
