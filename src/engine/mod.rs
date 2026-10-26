@@ -21,6 +21,7 @@ pub use api::{
     InsertStyle, Key, Lifecycle, Mode, OperationKind, Operator, Replacement, Step, TargetRequest,
     Transaction,
 };
+pub use playback::MacroPlayback;
 use std::collections::VecDeque;
 
 const MAX_COUNT: usize = 100_000;
@@ -251,13 +252,6 @@ impl Default for Limits {
     }
 }
 
-#[derive(Debug)]
-struct MacroFrame {
-    keys: Vec<Key>,
-    index: usize,
-    repeats: usize,
-}
-
 /// Repeat history, macro playback and registers shared across editing surfaces.
 #[derive(Debug, Default)]
 pub struct Session {
@@ -265,12 +259,9 @@ pub struct Session {
     last_change: Option<Recipe>,
     recording: Option<(char, Vec<Key>)>,
     last_macro: Option<char>,
-    frames: Vec<MacroFrame>,
+    playback: MacroPlayback<Key>,
     macro_document: Option<u64>,
-    macro_steps: usize,
-
     next_operation: u64,
-    limits: Limits,
 }
 
 impl Session {
@@ -282,7 +273,7 @@ impl Session {
     /// Start an empty session with caller-selected recording and playback limits.
     pub fn with_limits(limits: Limits) -> Self {
         Self {
-            limits,
+            playback: MacroPlayback::with_limits(limits),
             ..Self::default()
         }
     }
@@ -304,7 +295,7 @@ impl Session {
 
     /// Report whether playback frames remain on the dispatch stack.
     pub fn is_playing(&self) -> bool {
-        !self.frames.is_empty()
+        self.playback.is_playing()
     }
 
     /// Report whether dot has a completed change to repeat.
@@ -314,7 +305,7 @@ impl Session {
 
     /// Discard queued macro input, including remaining nested frames.
     pub fn cancel_playback(&mut self) {
-        self.frames.clear();
+        self.playback.cancel();
         self.macro_document = None;
     }
 
@@ -384,7 +375,7 @@ impl Session {
         }
         if input.origin == InputOrigin::Typed {
             if let Some((_, keys)) = &mut self.recording {
-                if keys.len() >= self.limits.recorded_keys {
+                if keys.len() >= self.playback.limits.recorded_keys {
                     self.recording = None;
                     return Step::Error(EngineError::RecordingLimit);
                 }

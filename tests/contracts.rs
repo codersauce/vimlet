@@ -422,3 +422,22 @@ fn backspace_in_replace_mode_restores_one_grapheme_from_batched_input() {
     host.key(&mut session, &mut state, Key::Backspace);
     assert_eq!(host.text, "aβcd");
 }
+
+#[test]
+fn host_macro_keys_share_one_budget_across_counts_and_nested_calls() {
+    let mut playback = MacroPlayback::with_limits(Limits {
+        macro_steps: 4,
+        ..Limits::default()
+    });
+    playback.push(vec![1, 2], 2).unwrap();
+    assert_eq!(playback.next_key().unwrap(), Some(1));
+    playback.push(vec![3], 2).unwrap();
+    assert_eq!(playback.next_key().unwrap(), Some(3));
+    assert_eq!(playback.next_key().unwrap(), Some(3));
+    assert_eq!(playback.next_key().unwrap(), Some(2));
+    assert_eq!(playback.next_key(), Err(EngineError::PlaybackLimit));
+    assert!(!playback.is_playing());
+    playback.push(vec![4], 1).unwrap();
+    assert_eq!(playback.next_key().unwrap(), Some(4));
+    assert_eq!(playback.next_key().unwrap(), None);
+}

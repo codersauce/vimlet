@@ -105,6 +105,16 @@
     "keys": "qaix<Esc>lq@a"
   },
   {
+    "name": "missing nested register stops the outer macro",
+    "text": "hello",
+    "keys": "qa@zix<Esc>q@a"
+  },
+  {
+    "name": "counted nested macro repeats before the outer macro resumes",
+    "text": "hello",
+    "keys": "qbix<Esc>qqa2@bq2@a"
+  },
+  {
     "name": "last macro",
     "text": "abc def ghi",
     "keys": "qaxq@a@@"
