@@ -818,7 +818,17 @@ impl Session {
                     if ends_on_empty_line {
                         text.push('\n');
                     }
-                    if !text.is_empty() || shape == Shape::Line && !edits.is_empty() {
+                    // A change to the end of an empty line still sets the characterwise register.
+                    let change_to_end = matches!(
+                        command.action,
+                        Action::Operate {
+                            operator: Operator::Change,
+                            target: EditTarget::Motion(crate::Motion::LineEnd),
+                        }
+                    );
+                    if !text.is_empty()
+                        || (shape == Shape::Line || change_to_end) && !edits.is_empty()
+                    {
                         self.registers
                             .delete(normalized_register(text, shape), numbered);
                     }

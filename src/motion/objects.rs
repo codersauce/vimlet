@@ -23,6 +23,10 @@ impl MotionResolver<'_> {
         kind: TextObjectKind,
         count: usize,
     ) -> Option<ResolvedRange> {
+        let cursor = self.normal_cursor(self.cursor);
+        if cursor != self.cursor {
+            return Self { cursor, ..*self }.text_object(scope, kind, count);
+        }
         match kind {
             TextObjectKind::Word => self.word_object(scope, false, count),
             TextObjectKind::BigWord => self.word_object(scope, true, count),

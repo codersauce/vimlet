@@ -652,8 +652,13 @@ impl<'a> MotionResolver<'a> {
             return self.exclusive_range(target.position);
         }
         let start = self.cursor.min(target.position.0);
-        let end = self.next(self.cursor.max(target.position.0));
-        (start < end).then(|| ResolvedRange::character(start, end))
+        let last = self.cursor.max(target.position.0);
+        let end = if motion == Motion::LineEnd && last == self.text.line_end(last) {
+            last
+        } else {
+            self.next(last)
+        };
+        (start < end || change).then(|| ResolvedRange::character(start, end))
     }
 
     /// Convert a host-resolved exclusive motion into an operator range.

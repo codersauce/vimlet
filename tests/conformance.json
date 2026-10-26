@@ -1676,5 +1676,16 @@
     "name": "counted replace with a single line break",
     "text": "abcd",
     "keys": "3r<CR>"
+  },
+  {
+    "name": "empty line change to end",
+    "text": "\nnext",
+    "keys": "c$"
+  },
+  {
+    "name": "WORD object at host insertion point",
+    "text": "foo bar",
+    "cursor": 7,
+    "keys": "ciW"
   }
 ]
