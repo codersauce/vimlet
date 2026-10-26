@@ -265,6 +265,10 @@ impl Session {
             numbered,
             separator_bytes: prefix,
         });
+        if operator == Operator::Delete && shape == Shape::Line && prefix == 0 {
+            let end = range.ranges[0].end.0;
+            cursor.0 += resolver.first_non_blank(end).saturating_sub(end);
+        }
         if prefix > 0 {
             cursor = ByteOffset(resolver.first_non_blank(range.ranges[0].start.0));
         }

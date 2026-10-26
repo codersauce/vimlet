@@ -577,28 +577,49 @@ impl<'a> MotionResolver<'a> {
             return (end > self.cursor || change)
                 .then(|| ResolvedRange::character(self.cursor, end));
         }
-        let mut motion = motion;
-        if change {
-            // On a nonblank, Neovim's cw leaves the whitespace after the word intact.
-            if let Motion::Word {
-                destination: WordDestination::NextStart,
-                class,
-            } = motion
-            {
-                let big = class == WordClass::BigWord;
-                if self.kind(self.cursor, big) != 0 {
-                    let next = self.next(self.cursor);
-                    if count <= 1 && self.kind(next, big) != self.kind(self.cursor, big) {
-                        return Some(ResolvedRange::character(self.cursor, next));
-                    }
-                    motion = Motion::Word {
-                        destination: WordDestination::NextEnd,
-                        class,
-                    };
-                }
+        let target = if let Motion::Word {
+            destination: WordDestination::NextStart,
+            class,
+        } = motion
+        {
+            let big = class == WordClass::BigWord;
+            if change && self.kind(self.cursor, big) != 0 {
+                // For cw the character under the cursor can already be the first counted word end.
+                let next = self.next(self.cursor);
+                let at_end = self.kind(next, big) != self.kind(self.cursor, big);
+                let remaining = count.max(1) - usize::from(at_end);
+                let end = self.word(remaining, false, true, big);
+                return Some(ResolvedRange::character(self.cursor, self.next(end)));
             }
-        }
-        let target = self.resolve(motion, count)?;
+            let mut last = *self;
+            last.cursor = self.word(count.max(1) - 1, false, false, big);
+            let mut end = last.word(1, false, false, big);
+            let line_end = self.text.line_end(last.cursor);
+            // Only the final step stops at EOL. Starting on an empty line includes its separator.
+            if end >= line_end
+                && self.text.line_start(last.cursor) > self.cursor
+                && self.cursor <= self.first_non_blank(self.cursor)
+            {
+                return Some(self.lines(self.cursor, last.cursor));
+            }
+            if end > line_end {
+                end = if self.text.line_start(last.cursor) == line_end {
+                    self.text.next_line(last.cursor)
+                } else {
+                    line_end
+                };
+            }
+            if change && end == self.cursor {
+                return Some(ResolvedRange::character(end, end));
+            }
+            Target {
+                position: ByteOffset(end),
+                inclusive: false,
+                linewise: false,
+            }
+        } else {
+            self.resolve(motion, count)?
+        };
         if target.linewise {
             if matches!(motion, Motion::Up | Motion::Down)
                 && self.text.line_start(target.position.0) == self.text.line_start(self.cursor)
@@ -613,24 +634,6 @@ impl<'a> MotionResolver<'a> {
         );
         if target.inclusive {
             end = self.next(end);
-        }
-        if matches!(
-            motion,
-            Motion::Word {
-                destination: WordDestination::NextStart,
-                ..
-            }
-        ) && end > self.text.line_end(self.cursor)
-        {
-            let line_end = self.text.line_end(self.cursor);
-            if self
-                .text
-                .slice(line_end, end)
-                .chars()
-                .all(char::is_whitespace)
-            {
-                end = line_end;
-            }
         }
         if !target.inclusive && end > start && self.text.line_start(end) == end {
             if start <= self.first_non_blank(start) {

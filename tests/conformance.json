@@ -1410,5 +1410,75 @@
     "text": "abc\n\ndef",
     "cursor": 4,
     "keys": "l"
+  },
+  {
+    "name": "count one scalar",
+    "text": "α β γ δ",
+    "keys": "c2wX<Esc>"
+  },
+  {
+    "name": "empty delete",
+    "text": "\n    next line",
+    "keys": "dw"
+  },
+  {
+    "name": "empty change",
+    "text": "\n    next line",
+    "keys": "cwX<Esc>"
+  },
+  {
+    "name": "blank last small",
+    "text": "alpha beta\n\nnext line",
+    "keys": "wd2w"
+  },
+  {
+    "name": "blank last big",
+    "text": "foo.bar\n\n baz qux",
+    "keys": "d2W"
+  },
+  {
+    "name": "blank last yank",
+    "text": "alpha beta\n\nnext line",
+    "keys": "wy2w"
+  },
+  {
+    "name": "blank last small indent",
+    "text": "foo.bar\n\n baz qux",
+    "keys": "d3w"
+  },
+  {
+    "name": "blank last big nonzero",
+    "text": "a foo.bar\n\n baz qux",
+    "keys": "wd2W"
+  },
+  {
+    "name": "blank last small zero",
+    "text": "foobar\n\n baz qux",
+    "keys": "d2w"
+  },
+  {
+    "name": "empty big",
+    "text": "\n    next line",
+    "keys": "dW"
+  },
+  {
+    "name": "empty change eof",
+    "text": "",
+    "keys": "cwX<Esc>"
+  },
+  {
+    "name": "initial whitespace",
+    "text": "   foo",
+    "keys": "cwX<Esc>"
+  },
+  {
+    "name": "single at end",
+    "text": "ab c ef",
+    "keys": "lc2wX<Esc>"
+  },
+  {
+    "name": "one empty line op",
+    "text": "\n",
+    "keys": "dw"
   }
 ]

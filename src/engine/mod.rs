@@ -606,7 +606,7 @@ impl Session {
                     if prefix > 0 && text.is_char_boundary(prefix) {
                         text.drain(..prefix);
                     }
-                    if !text.is_empty() {
+                    if !text.is_empty() || shape == Shape::Line && !edits.is_empty() {
                         self.registers
                             .delete(normalized_register(text, shape), numbered);
                     }
