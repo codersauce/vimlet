@@ -6,6 +6,46 @@ use super::{
 use crate::MotionResolver;
 
 impl Session {
+    pub(super) fn swap_block_corners(
+        &mut self,
+        state: &mut EditingState,
+        view: DocumentView<'_>,
+    ) -> Step {
+        let Some(selection) = view.selection else {
+            return Step::Consumed;
+        };
+        let resolver = MotionResolver::from_view(view);
+        let span = |position: ByteOffset| {
+            let start = resolver.column(position.0);
+            let text = view.text.slice(position.0, resolver.next(position.0));
+            let end = start + view.geometry.width(&text, start).saturating_sub(1);
+            (start, end)
+        };
+        let (anchor_start, anchor_end) = span(selection.anchor);
+        let (cursor_start, cursor_end) = span(selection.cursor);
+        let left = anchor_start.min(cursor_start);
+        let right = anchor_end.max(cursor_end);
+        let anchor_line = view.text.line_start(selection.anchor.0);
+        let cursor_line = view.text.line_start(selection.cursor.0);
+        let mut anchor = resolver.at_visual_column(anchor_line, left);
+        let mut cursor = resolver.at_visual_column(cursor_line, right);
+        let mut column = right;
+        // A corner can cover several cells in a tab or wide grapheme. Neovim tries
+        // the right edge first, then the left if it would leave the cursor in place.
+        if cursor == selection.cursor.0 {
+            anchor = resolver.at_visual_column(anchor_line, right);
+            cursor = resolver.at_visual_column(cursor_line, left);
+            column = left;
+        }
+        state.preferred_column = Some(column);
+        let selection = Selection {
+            anchor: ByteOffset(anchor),
+            cursor: ByteOffset(cursor),
+            ..selection
+        };
+        self.move_to(state, view, selection.cursor, state.mode, Some(selection))
+    }
+
     pub(super) fn repeat_visual(
         &mut self,
         state: &mut EditingState,

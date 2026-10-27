@@ -111,6 +111,9 @@ pub enum Motion {
     Up,
     /// Move down a logical line using the host's display columns (`j`).
     Down,
+    /// Move down the counted logical lines to the first nonblank (Visual Enter).
+    /// Return no target when already on the final line; otherwise clamp to that line.
+    NextLineFirstNonBlank,
     /// Move to byte zero of the current line (`0`).
     LineStart,
     /// Move to the first non-whitespace grapheme on the line (`^`).
@@ -323,6 +326,10 @@ impl<'a> MotionResolver<'a> {
 
     /// Map a display column on the line beginning at `start` to a Normal-mode byte offset.
     pub fn at_column(&self, start: usize, col: usize) -> usize {
+        self.normal_cursor(self.at_visual_column(start, col))
+    }
+
+    pub(crate) fn at_visual_column(&self, start: usize, col: usize) -> usize {
         let end = self.text.line_end(start);
         let mut p = start;
         let mut column = 0;
@@ -335,7 +342,7 @@ impl<'a> MotionResolver<'a> {
             column += width;
             p = next;
         }
-        self.normal_cursor(p)
+        p
     }
 
     /// Resolve a motion from the current cursor. Zero represents an omitted prefix count.
@@ -382,13 +389,29 @@ impl<'a> MotionResolver<'a> {
                         line = self.text.line_start(line - 1);
                     } else {
                         let next = self.text.next_line(line);
-                        if next <= line || next >= self.text.len_bytes() {
+                        if next <= line || self.text.byte_at(next - 1) != Some(b'\n') {
                             break;
                         }
                         line = next;
                     }
                 }
                 p = self.at_column(line, col);
+                linewise = true;
+            }
+            Motion::NextLineFirstNonBlank => {
+                let start = self.text.line_start(p);
+                let mut line = start;
+                for _ in 0..n {
+                    let next = self.text.next_line(line);
+                    if next <= line || self.text.byte_at(next - 1) != Some(b'\n') {
+                        break;
+                    }
+                    line = next;
+                }
+                if line == start {
+                    return None;
+                }
+                p = self.first_non_blank(line);
                 linewise = true;
             }
             Motion::LineStart => p = self.text.line_start(p),

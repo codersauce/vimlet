@@ -1687,5 +1687,348 @@
     "text": "foo bar",
     "cursor": 7,
     "keys": "ciW"
+  },
+  {
+    "name": "visual character enter next line",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 0,
+    "keys": "v<CR>"
+  },
+  {
+    "name": "visual character enter count and anchor",
+    "text": "abc\n  def\n\tghi\nlast",
+    "cursor": 1,
+    "keys": "v2<CR>o"
+  },
+  {
+    "name": "visual character enter count past EOF",
+    "text": "abc\n  def\n\tghi\nlast",
+    "cursor": 1,
+    "keys": "v9<CR>"
+  },
+  {
+    "name": "visual character enter whitespace line",
+    "text": "abc\n   \nlast",
+    "cursor": 1,
+    "keys": "v<CR>"
+  },
+  {
+    "name": "visual character enter empty line",
+    "text": "abc\n\nlast",
+    "cursor": 1,
+    "keys": "v<CR>"
+  },
+  {
+    "name": "visual character enter trailing empty line",
+    "text": "abc\n",
+    "cursor": 1,
+    "keys": "v<CR>"
+  },
+  {
+    "name": "visual character enter EOF no movement",
+    "text": "abc\n  def",
+    "cursor": 7,
+    "keys": "v<CR>"
+  },
+  {
+    "name": "visual character enter reset preferred column",
+    "text": "  alpha\n    beta\n gamma",
+    "cursor": 5,
+    "keys": "v<CR>k"
+  },
+  {
+    "name": "visual character enter preserve column at EOF",
+    "text": "abcdefgh\nx",
+    "cursor": 7,
+    "keys": "vj<CR>k"
+  },
+  {
+    "name": "visual character enter yank selection",
+    "text": "abc\n  def\nlast",
+    "cursor": 1,
+    "keys": "v<CR>y"
+  },
+  {
+    "name": "visual line enter next line",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 0,
+    "keys": "V<CR>"
+  },
+  {
+    "name": "visual line enter count and anchor",
+    "text": "abc\n  def\n\tghi\nlast",
+    "cursor": 1,
+    "keys": "V2<CR>o"
+  },
+  {
+    "name": "visual line enter count past EOF",
+    "text": "abc\n  def\n\tghi\nlast",
+    "cursor": 1,
+    "keys": "V9<CR>"
+  },
+  {
+    "name": "visual line enter whitespace line",
+    "text": "abc\n   \nlast",
+    "cursor": 1,
+    "keys": "V<CR>"
+  },
+  {
+    "name": "visual line enter empty line",
+    "text": "abc\n\nlast",
+    "cursor": 1,
+    "keys": "V<CR>"
+  },
+  {
+    "name": "visual line enter trailing empty line",
+    "text": "abc\n",
+    "cursor": 1,
+    "keys": "V<CR>"
+  },
+  {
+    "name": "visual line enter EOF no movement",
+    "text": "abc\n  def",
+    "cursor": 7,
+    "keys": "V<CR>"
+  },
+  {
+    "name": "visual line enter reset preferred column",
+    "text": "  alpha\n    beta\n gamma",
+    "cursor": 5,
+    "keys": "V<CR>k"
+  },
+  {
+    "name": "visual line enter preserve column at EOF",
+    "text": "abcdefgh\nx",
+    "cursor": 7,
+    "keys": "Vj<CR>k"
+  },
+  {
+    "name": "visual line enter yank selection",
+    "text": "abc\n  def\nlast",
+    "cursor": 1,
+    "keys": "V<CR>y"
+  },
+  {
+    "name": "visual block enter next line",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 0,
+    "keys": "<C-v><CR>"
+  },
+  {
+    "name": "visual block enter count and anchor",
+    "text": "abc\n  def\n\tghi\nlast",
+    "cursor": 1,
+    "keys": "<C-v>2<CR>o"
+  },
+  {
+    "name": "visual block enter count past EOF",
+    "text": "abc\n  def\n\tghi\nlast",
+    "cursor": 1,
+    "keys": "<C-v>9<CR>"
+  },
+  {
+    "name": "visual block enter whitespace line",
+    "text": "abc\n   \nlast",
+    "cursor": 1,
+    "keys": "<C-v><CR>"
+  },
+  {
+    "name": "visual block enter empty line",
+    "text": "abc\n\nlast",
+    "cursor": 1,
+    "keys": "<C-v><CR>"
+  },
+  {
+    "name": "visual block enter trailing empty line",
+    "text": "abc\n",
+    "cursor": 1,
+    "keys": "<C-v><CR>"
+  },
+  {
+    "name": "visual block enter EOF no movement",
+    "text": "abc\n  def",
+    "cursor": 7,
+    "keys": "<C-v><CR>"
+  },
+  {
+    "name": "visual block enter reset preferred column",
+    "text": "  alpha\n    beta\n gamma",
+    "cursor": 5,
+    "keys": "<C-v><CR>k"
+  },
+  {
+    "name": "visual block enter preserve column at EOF",
+    "text": "abcdefgh\nx",
+    "cursor": 7,
+    "keys": "<C-v>j<CR>k"
+  },
+  {
+    "name": "visual block enter yank selection",
+    "text": "abc\n  def\nlast",
+    "cursor": 1,
+    "keys": "<C-v><CR>y"
+  },
+  {
+    "name": "visual block O lower right",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 0,
+    "keys": "<C-v>jlO"
+  },
+  {
+    "name": "visual block O diagonal o",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 0,
+    "keys": "<C-v>jlo"
+  },
+  {
+    "name": "visual block O anchor corner",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 0,
+    "keys": "<C-v>jlOo"
+  },
+  {
+    "name": "visual block O twice",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 0,
+    "keys": "<C-v>jlOO"
+  },
+  {
+    "name": "visual block O ignored count",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 0,
+    "keys": "<C-v>jl2O"
+  },
+  {
+    "name": "visual block O lower left",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 1,
+    "keys": "<C-v>jhO"
+  },
+  {
+    "name": "visual block O upper right",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 5,
+    "keys": "<C-v>klO"
+  },
+  {
+    "name": "visual block O upper left",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 6,
+    "keys": "<C-v>khO"
+  },
+  {
+    "name": "visual block O delete rectangle",
+    "text": "abcd\nefgh\nijkl",
+    "cursor": 0,
+    "keys": "<C-v>jlOd"
+  },
+  {
+    "name": "visual block O tab corner",
+    "text": "abcdefghi\n\tx",
+    "cursor": 2,
+    "keys": "<C-v>jO"
+  },
+  {
+    "name": "visual block O tab anchor",
+    "text": "abcdefghi\n\tx",
+    "cursor": 2,
+    "keys": "<C-v>jOo"
+  },
+  {
+    "name": "visual block O tab repeat",
+    "text": "abcdefghi\n\tx",
+    "cursor": 2,
+    "keys": "<C-v>jOOo"
+  },
+  {
+    "name": "visual block O short row",
+    "text": "abcdef\nxy",
+    "cursor": 4,
+    "keys": "<C-v>jO"
+  },
+  {
+    "name": "visual block O preferred column",
+    "text": "abcdef\nxy\nmnopqr",
+    "cursor": 4,
+    "keys": "<C-v>j0Oj"
+  },
+  {
+    "name": "visual block O empty row",
+    "text": "abcdef\n\nmnopqr",
+    "cursor": 4,
+    "keys": "<C-v>jO"
+  },
+  {
+    "name": "visual block O wide corner",
+    "text": "abcdef\n界xyz",
+    "cursor": 1,
+    "keys": "<C-v>jO"
+  },
+  {
+    "name": "visual block O wide anchor",
+    "text": "abcdef\n界xyz",
+    "cursor": 1,
+    "keys": "<C-v>jOo"
+  },
+  {
+    "name": "visual block O combining corner",
+    "text": "éabc\nédef",
+    "cursor": 0,
+    "keys": "<C-v>jlO"
+  },
+  {
+    "name": "visual character O swaps endpoints",
+    "text": "abcd\nefgh",
+    "keys": "vjlO"
+  },
+  {
+    "name": "visual line O swaps endpoints",
+    "text": "abcd\nefgh",
+    "keys": "VjlO"
+  },
+  {
+    "name": "visual character trailing empty row",
+    "text": "abcd\nef\n",
+    "keys": "v$jj"
+  },
+  {
+    "name": "visual character count to trailing row",
+    "text": "abcd\nef\n",
+    "keys": "v$2j"
+  },
+  {
+    "name": "visual character return from trailing row",
+    "text": "abcd\nef\n",
+    "keys": "v<CR><CR>k"
+  },
+  {
+    "name": "visual line trailing empty row",
+    "text": "abcd\nef\n",
+    "keys": "V$jj"
+  },
+  {
+    "name": "visual line count to trailing row",
+    "text": "abcd\nef\n",
+    "keys": "V$2j"
+  },
+  {
+    "name": "visual line return from trailing row",
+    "text": "abcd\nef\n",
+    "keys": "V<CR><CR>k"
+  },
+  {
+    "name": "visual block trailing empty row",
+    "text": "abcd\nef\n",
+    "keys": "<C-v>$jj"
+  },
+  {
+    "name": "visual block count to trailing row",
+    "text": "abcd\nef\n",
+    "keys": "<C-v>$2j"
+  },
+  {
+    "name": "visual block return from trailing row",
+    "text": "abcd\nef\n",
+    "keys": "<C-v><CR><CR>k"
   }
 ]

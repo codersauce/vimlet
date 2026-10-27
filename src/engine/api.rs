@@ -312,6 +312,9 @@ pub enum Action {
     Visual(Shape),
     /// Exchange the active cursor and selection anchor (`o`).
     SwapVisual,
+    /// Switch horizontal corners of a Visual block, keeping each endpoint on its line (`O`).
+    /// Outside block mode, exchange the cursor and anchor as [`Action::SwapVisual`] does.
+    SwapVisualHorizontal,
     /// Restore the previous Visual selection (`gv`).
     Reselect,
     /// Request a change to host-owned undo history.

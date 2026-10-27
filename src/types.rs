@@ -83,6 +83,8 @@ pub enum Shape {
 }
 
 /// Cursor and anchor are inclusive in Visual mode.
+/// An endpoint may occupy a logical line's end, including EOF on a trailing empty line.
+/// Display positions beyond that line end are not represented by these byte offsets.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Selection {
     /// Inclusive UTF-8 byte offset where the selection began.

@@ -85,6 +85,9 @@ pub(super) fn parse(state: &mut EditingState, key: &Key) -> Parsed {
         Key::Char('i' | 'a' | 'I' | 'A' | 'o' | 'O' | 'R') => {
             if state.mode.is_visual() {
                 match key {
+                    Key::Char('O') if state.mode == Mode::VisualBlock => {
+                        return command(Action::SwapVisualHorizontal, count)
+                    }
                     Key::Char('o' | 'O') => return command(Action::SwapVisual, count),
                     Key::Char('I' | 'A') if state.mode == Mode::VisualBlock => {
                         return command(
@@ -212,6 +215,7 @@ fn parse_target(
         Key::Char('l') | Key::Right | Key::Char(' ') => Motion::Right,
         Key::Char('j') | Key::Down => Motion::Down,
         Key::Char('k') | Key::Up => Motion::Up,
+        Key::Enter if state.mode.is_visual() => Motion::NextLineFirstNonBlank,
         Key::Char('0') | Key::Home => Motion::LineStart,
         Key::Char('^') => Motion::FirstNonBlank,
         Key::Char('$') | Key::End => Motion::LineEnd,

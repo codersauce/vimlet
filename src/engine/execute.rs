@@ -32,7 +32,10 @@ impl Session {
         command.count = command.count.min(MAX_COUNT);
         let n = command.count.max(1);
         let resolver = MotionResolver::from_view(view);
-        if !matches!(command.action, Action::Move(Motion::Up | Motion::Down)) {
+        if !matches!(
+            command.action,
+            Action::Move(Motion::Up | Motion::Down | Motion::NextLineFirstNonBlank)
+        ) {
             state.preferred_column = None;
         }
         match command.action {
@@ -56,7 +59,10 @@ impl Session {
                 };
                 self.move_to(state, view, view.cursor, mode, Some(selection))
             }
-            Action::SwapVisual => {
+            Action::SwapVisualHorizontal if state.mode == Mode::VisualBlock => {
+                self.swap_block_corners(state, view)
+            }
+            Action::SwapVisual | Action::SwapVisualHorizontal => {
                 let Some(s) = view.selection else {
                     return Step::Consumed;
                 };
@@ -194,14 +200,26 @@ impl Session {
             self.abort_input(state);
             return Step::Consumed;
         };
+        if motion == Motion::NextLineFirstNonBlank {
+            state.preferred_column = None;
+        }
+        let visual_vertical = state.mode.is_visual() && matches!(motion, Motion::Up | Motion::Down);
         if matches!(motion, Motion::Up | Motion::Down) {
             let column = *state
                 .preferred_column
                 .get_or_insert_with(|| resolver.column(view.cursor.0));
-            target.position =
-                ByteOffset(resolver.at_column(view.text.line_start(target.position.0), column));
+            let line = view.text.line_start(target.position.0);
+            target.position = ByteOffset(if visual_vertical {
+                resolver.at_visual_column(line, column)
+            } else {
+                resolver.at_column(line, column)
+            });
         }
-        let cursor = ByteOffset(resolver.normal_cursor(target.position.0));
+        let cursor = if visual_vertical {
+            target.position
+        } else {
+            ByteOffset(resolver.normal_cursor(target.position.0))
+        };
         let selection = if state.mode.is_visual() {
             Some(Selection {
                 anchor: view.selection.map_or(view.cursor, |s| s.anchor),

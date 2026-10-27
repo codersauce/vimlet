@@ -318,6 +318,63 @@ fn visual_block_change_uses_host_geometry() {
 }
 
 #[test]
+fn visual_enter_preserves_the_anchor_and_shape() {
+    for (keys, mode, shape) in [
+        ("lv<CR>", Mode::Visual, Shape::Character),
+        ("lV<CR>", Mode::VisualLine, Shape::Line),
+        ("l<C-v><CR>", Mode::VisualBlock, Shape::Block { width: 1 }),
+    ] {
+        let (host, _, state) = run("abc\n  def", keys);
+        assert_eq!(state.mode(), mode);
+        assert_eq!(host.cursor, ByteOffset(6));
+        assert_eq!(
+            host.selection,
+            Some(Selection {
+                anchor: ByteOffset(1),
+                cursor: ByteOffset(6),
+                shape,
+            }),
+            "{keys}"
+        );
+    }
+}
+
+#[test]
+fn block_corner_swap_preserves_endpoint_lines_and_covers_wide_cells() {
+    for (text, keys, anchor, cursor) in [
+        ("abcd\nefgh", "<C-v>jlO", 1, 5),
+        ("abcd\nefgh", "<C-v>jlo", 6, 0),
+        ("abcdefghi\n\tx", "ll<C-v>jO", 7, 10),
+        ("abcdef\n界xyz", "l<C-v>jO", 1, 7),
+        ("abcdef\nxy", "4l<C-v>jO", 4, 9),
+    ] {
+        let (host, _, state) = run(text, keys);
+        assert_eq!(state.mode(), Mode::VisualBlock);
+        assert_eq!(host.cursor, ByteOffset(cursor), "{keys} on {text:?}");
+        assert_eq!(
+            host.selection,
+            Some(Selection {
+                anchor: ByteOffset(anchor),
+                cursor: ByteOffset(cursor),
+                shape: Shape::Block { width: 1 },
+            }),
+            "{keys} on {text:?}"
+        );
+    }
+}
+
+#[test]
+fn normal_enter_remains_available_to_the_host() {
+    let (mut host, mut session, mut state) = run("abc\ndef", "");
+    assert_eq!(
+        host.key(&mut session, &mut state, Key::Enter),
+        Step::Unhandled
+    );
+    assert_eq!(host.cursor, ByteOffset(0));
+    assert_eq!(host.selection, None);
+}
+
+#[test]
 fn same_session_shares_dot_but_not_pending_mode() {
     let (mut h, mut s, mut first) = run("abc", "x");
     let mut second = EditingState::default();
