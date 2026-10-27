@@ -15,14 +15,8 @@ impl Session {
             return Step::Consumed;
         };
         let resolver = MotionResolver::from_view(view);
-        let span = |position: ByteOffset| {
-            let start = resolver.column(position.0);
-            let text = view.text.slice(position.0, resolver.next(position.0));
-            let end = start + view.geometry.width(&text, start).saturating_sub(1);
-            (start, end)
-        };
-        let (anchor_start, anchor_end) = span(selection.anchor);
-        let (cursor_start, cursor_end) = span(selection.cursor);
+        let (anchor_start, anchor_end) = resolver.column_span(selection.anchor.0);
+        let (cursor_start, cursor_end) = resolver.column_span(selection.cursor.0);
         let left = anchor_start.min(cursor_start);
         let right = anchor_end.max(cursor_end);
         let anchor_line = view.text.line_start(selection.anchor.0);
@@ -62,11 +56,14 @@ impl Session {
                 resolver.column(view.cursor.0) + extent.columns.saturating_sub(1),
             )
         } else if extent.lines <= 1 {
-            let mut p = view.cursor.0;
-            for _ in 1..extent.columns {
-                p = resolver.next(p).min(view.text.line_end(p));
-            }
-            p
+            // Neovim's cursor sits on the final display cell of a tab.
+            let (start, end) = resolver.column_span(view.cursor.0);
+            let column = if view.text.byte_at(view.cursor.0) == Some(b'\t') {
+                end
+            } else {
+                start
+            };
+            resolver.at_visual_column(last, column + extent.columns.saturating_sub(1))
         } else {
             resolver.at_column(last, extent.columns.saturating_sub(1))
         };
@@ -117,9 +114,9 @@ pub(super) fn visual_extent(view: DocumentView<'_>) -> Option<VisualExtent> {
     let columns = if matches!(s.shape, Shape::Block { .. }) {
         resolver.column(first).abs_diff(resolver.column(last)) + 1
     } else if lines == 1 {
-        resolver.column(last) - resolver.column(first) + 1
+        resolver.column_span(last).1 - resolver.column(first) + 1
     } else {
-        resolver.column(last) + 1
+        resolver.column_span(last).1 + 1
     };
     Some(VisualExtent {
         shape: s.shape,

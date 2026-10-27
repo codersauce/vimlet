@@ -2030,5 +2030,45 @@
     "name": "visual block return from trailing row",
     "text": "abcd\nef\n",
     "keys": "<C-v><CR><CR>k"
+  },
+  {
+    "name": "visual dot wide last",
+    "text": "a界b\n123456",
+    "keys": "vldj0."
+  },
+  {
+    "name": "visual dot wide destination",
+    "text": "ab\n界xyz",
+    "keys": "vldj0."
+  },
+  {
+    "name": "visual dot wide reversed",
+    "text": "a界b\n123456",
+    "keys": "lvhdj0."
+  },
+  {
+    "name": "visual dot combining source",
+    "text": "éab\n123456",
+    "keys": "vldj0."
+  },
+  {
+    "name": "visual dot combining destination",
+    "text": "ab\néxy",
+    "keys": "vldj0."
+  },
+  {
+    "name": "visual dot tab source",
+    "text": "a\tb\n1234567890",
+    "keys": "vldj0."
+  },
+  {
+    "name": "visual dot tab destination",
+    "text": "ab\n\tx",
+    "keys": "vldj0."
+  },
+  {
+    "name": "visual dot multiline wide end",
+    "text": "a\n界b\ncd\n123456",
+    "keys": "vjdj0."
   }
 ]

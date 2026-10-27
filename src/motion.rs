@@ -324,6 +324,13 @@ impl<'a> MotionResolver<'a> {
         col
     }
 
+    pub(crate) fn column_span(&self, position: usize) -> (usize, usize) {
+        let start = self.column(position);
+        let text = self.text.slice(position, self.next(position));
+        let width = self.geometry.width(&text, start);
+        (start, start + width.saturating_sub(1))
+    }
+
     /// Map a display column on the line beginning at `start` to a Normal-mode byte offset.
     pub fn at_column(&self, start: usize, col: usize) -> usize {
         self.normal_cursor(self.at_visual_column(start, col))
