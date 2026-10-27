@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/codersauce/vimlet/main/assets/vimlet.png"
+       alt="Vimlet: an outlet with terminal-shaped openings"
+       width="144">
+</p>
+
 # Vimlet
 
 Vimlet adds Vim editing to Rust applications. Extracted from the Red editor, it interprets keys, manages modes, registers and repeat, and returns operations for your application to apply. Your application keeps its text storage, undo history and UI.

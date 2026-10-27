@@ -11,7 +11,7 @@ homepage = "https://github.com/codersauce/vimlet"
 documentation = "https://docs.rs/vimlet"
 keywords = ["vim", "editor", "modal", "headless"]
 categories = ["text-editors"]
-include = ["src/**", "examples/**", "tests/**", "docs/**", "scripts/**", "Cargo.toml", "Cargo.lock", "README.md", "LICENSE", "NOTICE"]
+include = ["src/**", "examples/**", "tests/**", "docs/**", "scripts/**", "assets/vimlet.png", "Cargo.toml", "Cargo.lock", "README.md", "LICENSE", "NOTICE"]
 
 [package.metadata.docs.rs]
 all-features = true
