@@ -31,6 +31,7 @@ impl Session {
                 numbered: false,
                 separator_bytes: 0,
                 ends_on_empty_line: false,
+                projected_rows: Vec::new(),
             });
         if let Some(selection) = view
             .selection

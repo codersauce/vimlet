@@ -260,8 +260,15 @@ impl Session {
             if !text.is_empty() {
                 for p in &state.block_insert {
                     replacements.push(Replacement {
-                        range: TextRange::new(p.offset.0, p.offset.0),
-                        text: format!("{}{text}", " ".repeat(p.padding)),
+                        range: TextRange::new(
+                            p.offset.0,
+                            p.offset.0 + usize::from(p.tab_tail.is_some()),
+                        ),
+                        text: format!(
+                            "{}{text}{}",
+                            " ".repeat(p.padding),
+                            " ".repeat(p.tab_tail.unwrap_or(0))
+                        ),
                     });
                 }
             }

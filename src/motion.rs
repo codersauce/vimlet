@@ -2,6 +2,7 @@
 
 use crate::{ByteOffset, DocumentView, Shape, TextRange, TextSource};
 
+mod block;
 mod objects;
 
 /// A search for a single character on the current logical line.

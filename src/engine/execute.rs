@@ -205,9 +205,15 @@ impl Session {
         }
         let visual_vertical = state.mode.is_visual() && matches!(motion, Motion::Up | Motion::Down);
         if matches!(motion, Motion::Up | Motion::Down) {
-            let column = *state
-                .preferred_column
-                .get_or_insert_with(|| resolver.column(view.cursor.0));
+            let column = *state.preferred_column.get_or_insert_with(|| {
+                if state.mode == Mode::VisualBlock
+                    && view.text.byte_at(view.cursor.0) == Some(b'\t')
+                {
+                    resolver.column_span(view.cursor.0).1
+                } else {
+                    resolver.column(view.cursor.0)
+                }
+            });
             let line = view.text.line_start(target.position.0);
             target.position = ByteOffset(if visual_vertical {
                 resolver.at_visual_column(line, column)

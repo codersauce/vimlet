@@ -112,7 +112,7 @@ pub(super) fn visual_extent(view: DocumentView<'_>) -> Option<VisualExtent> {
     let last = s.anchor.0.max(s.cursor.0);
     let lines = view.text.line_index(last) - view.text.line_index(first) + 1;
     let columns = if matches!(s.shape, Shape::Block { .. }) {
-        resolver.column(first).abs_diff(resolver.column(last)) + 1
+        resolver.block_columns(s).len()
     } else if lines == 1 {
         resolver.column_span(last).1 - resolver.column(first) + 1
     } else {

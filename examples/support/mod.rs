@@ -3,9 +3,8 @@
 #![allow(dead_code)]
 use vimlet::{
     AppliedEdit, ByteOffset, DocumentVersion, DocumentView, EditingState, HistoryCommand,
-    HostOperation, HostOutcome, HostResult, Input, Key, MotionResolver, OperationKind,
-    ResolvedRange, Selection, Session, Shape, Step, TargetRequest, TextRange, TextSource,
-    Transaction, DEFAULT_GEOMETRY,
+    HostOperation, HostOutcome, HostResult, Input, Key, MotionResolver, OperationKind, Selection,
+    Session, Step, TargetRequest, TextRange, TextSource, Transaction, DEFAULT_GEOMETRY,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -200,37 +199,9 @@ impl StringHost {
                 request: TargetRequest::Block { selection },
                 ..
             } => {
-                // Example geometry uses grapheme columns. A real host projects
-                // terminal cells, tabs and virtual columns with its layout engine.
-                let resolver = MotionResolver::from_view(self.view());
-                let first_line = self
-                    .text
-                    .line_index(selection.anchor.0.min(selection.cursor.0));
-                let last_line = self
-                    .text
-                    .line_index(selection.anchor.0.max(selection.cursor.0));
-                let first_col = resolver
-                    .column(selection.anchor.0)
-                    .min(resolver.column(selection.cursor.0));
-                let last_col = resolver
-                    .column(selection.anchor.0)
-                    .max(resolver.column(selection.cursor.0));
-                let mut ranges = Vec::new();
-                for line in first_line..=last_line {
-                    let start = self.text.line_offset(line);
-                    let a = resolver.at_column(start, first_col);
-                    let b = resolver.at_column(start, last_col);
-                    ranges.push(TextRange::new(
-                        a,
-                        resolver.next(b).min(self.text.line_end(start)),
-                    ));
-                }
-                outcome = HostOutcome::Target(ResolvedRange {
-                    ranges,
-                    shape: Shape::Block {
-                        width: last_col - first_col + 1,
-                    },
-                });
+                outcome = HostOutcome::Target(
+                    MotionResolver::from_view(self.view()).block_range(selection),
+                );
             }
             _ => outcome = HostOutcome::Rejected,
         }

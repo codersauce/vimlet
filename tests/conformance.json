@@ -2070,5 +2070,100 @@
     "name": "visual dot multiline wide end",
     "text": "a\n界b\ncd\n123456",
     "keys": "vjdj0."
+  },
+  {
+    "name": "rectangular cells 'q' ll<C-v>jjcQ<Esc>",
+    "text": "abcd\nq\nwxyz",
+    "keys": "ll<C-v>jjcQ<Esc>"
+  },
+  {
+    "name": "rectangular cells 'q' ll<C-v>jjly",
+    "text": "abcd\nq\nwxyz",
+    "keys": "ll<C-v>jjly"
+  },
+  {
+    "name": "rectangular cells '界xy' l<C-v>jjd",
+    "text": "abc\n界xy\nklm",
+    "keys": "l<C-v>jjd"
+  },
+  {
+    "name": "rectangular cells '界xy' l<C-v>jjcQ<Esc>",
+    "text": "abc\n界xy\nklm",
+    "keys": "l<C-v>jjcQ<Esc>"
+  },
+  {
+    "name": "rectangular cells '界xy' l<C-v>jjr界",
+    "text": "abc\n界xy\nklm",
+    "keys": "l<C-v>jjr界"
+  },
+  {
+    "name": "rectangular cells '界xy' l<C-v>jjI!<Esc>",
+    "text": "abc\n界xy\nklm",
+    "keys": "l<C-v>jjI!<Esc>"
+  },
+  {
+    "name": "rectangular cells '\\txy' <C-v>jjA!<Esc>",
+    "text": "abc\n\txy\nklm",
+    "keys": "<C-v>jjA!<Esc>"
+  },
+  {
+    "name": "rectangular cells '\\txy' l<C-v>jjI!<Esc>",
+    "text": "abc\n\txy\nklm",
+    "keys": "l<C-v>jjI!<Esc>"
+  },
+  {
+    "name": "rectangular cells '\\txy' l<C-v>jjd",
+    "text": "abc\n\txy\nklm",
+    "keys": "l<C-v>jjd"
+  },
+  {
+    "name": "rectangular cells '' l<C-v>jjA!<Esc>",
+    "text": "abc\n\nklm",
+    "keys": "l<C-v>jjA!<Esc>"
+  },
+  {
+    "name": "rectangular cells '' l<C-v>jjI!<Esc>",
+    "text": "abc\n\nklm",
+    "keys": "l<C-v>jjI!<Esc>"
+  },
+  {
+    "name": "rectangular cells '' l<C-v>jjy",
+    "text": "abc\n\nklm",
+    "keys": "l<C-v>jjy"
+  },
+  {
+    "name": "rectangular cells '1234' l<C-v>jjy",
+    "text": "a界b\n1234\nx界z",
+    "keys": "l<C-v>jjy"
+  },
+  {
+    "name": "rectangular cells 'éy' <C-v>jjrx",
+    "text": "éx\néy\naz",
+    "keys": "<C-v>jjrx"
+  },
+  {
+    "name": "block edge l<C-v>jhI!<Esc>",
+    "text": "界xy\nabc",
+    "keys": "l<C-v>jhI!<Esc>"
+  },
+  {
+    "name": "block edge l<C-v>jhd",
+    "text": "界xy\nabc",
+    "keys": "l<C-v>jhd"
+  },
+  {
+    "name": "block edge <C-v>jlA!<Esc>",
+    "text": "\txy\n12345678123",
+    "keys": "<C-v>jlA!<Esc>"
+  },
+  {
+    "name": "block edge lyl<C-v>jjP",
+    "text": "abc\n界xy\nklm",
+    "keys": "lyl<C-v>jjP"
+  },
+  {
+    "name": "block edge l<C-v>jjd.",
+    "text": "abc\n界xy\nklm",
+    "keys": "l<C-v>jjd."
   }
 ]

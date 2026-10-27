@@ -32,6 +32,15 @@ impl Session {
         for r in &mut range.ranges {
             *r = resolver.expand_opaque(*r);
         }
+        if range
+            .ranges
+            .windows(2)
+            .any(|rows| rows[0].end > rows[1].start)
+        {
+            self.abort_input(state);
+            return Step::Consumed;
+        }
+        let columns = block_columns(view, range.shape);
         match command.action {
             Action::Operate { operator, .. } => {
                 self.edit_operator(state, command, operator, range, view)
@@ -75,6 +84,17 @@ impl Session {
                             return Replacement {
                                 range: *r,
                                 text: "\n".into(),
+                            };
+                        }
+                        if let Some(columns) = columns.clone() {
+                            let row = resolver.block_row(*r, columns);
+                            let mut bytes = [0; 4];
+                            let width = view.geometry.width(c.encode_utf8(&mut bytes), 0).max(1);
+                            return Replacement {
+                                range: *r,
+                                text: " ".repeat(row.before)
+                                    + &c.to_string().repeat(row.cells / width)
+                                    + &" ".repeat(row.cells % width + row.after),
                             };
                         }
                         let mut text = String::new();
@@ -130,22 +150,20 @@ impl Session {
                     .filter_map(|row| {
                         let end = view.text.line_end(row.start.0);
                         let columns = resolver.column(end);
-                        if !append && columns < left {
+                        if !append && (columns < left || resolver.column(first.start.0) < left) {
                             return None;
                         }
-                        let offset = if append {
-                            row.end
-                        } else if left == columns {
-                            ByteOffset(end)
-                        } else {
-                            row.start
-                        };
-                        let padding = if append {
-                            left.saturating_add(width).saturating_sub(columns)
-                        } else {
-                            0
-                        };
-                        Some(BlockInsertion { offset, padding })
+                        let target = if append { left + width } else { left };
+                        let offset =
+                            resolver.at_visual_column(view.text.line_start(row.start.0), target);
+                        let padding = target.saturating_sub(resolver.column(offset));
+                        let tab_tail = (padding > 0 && view.text.byte_at(offset) == Some(b'\t'))
+                            .then(|| resolver.column_span(offset).1 + 1 - target);
+                        Some(BlockInsertion {
+                            offset: ByteOffset(offset),
+                            padding,
+                            tab_tail,
+                        })
                     })
                     .collect();
                 self.edit(
@@ -221,6 +239,17 @@ impl Session {
                         });
                     }
                 }
+                let mut projected_rows = Vec::new();
+                if let Some(columns) = columns {
+                    for (r, replacement) in range.ranges.iter().zip(&mut replacements) {
+                        let row = resolver.block_row(*r, columns.clone());
+                        if replacement.range == *r {
+                            replacement.text =
+                                " ".repeat(row.before) + &replacement.text + &" ".repeat(row.after);
+                        }
+                        projected_rows.push((*r, row.selected));
+                    }
+                }
                 self.edit(
                     state,
                     command,
@@ -234,6 +263,7 @@ impl Session {
                             numbered: false,
                             separator_bytes: 0,
                             ends_on_empty_line: false,
+                            projected_rows,
                         }),
                     },
                 )
@@ -252,11 +282,27 @@ impl Session {
     ) -> Step {
         let shape = range.shape;
         let resolver = MotionResolver::from_view(view);
+        let columns = block_columns(view, shape);
+        let rows: Vec<_> = columns
+            .into_iter()
+            .flat_map(|cols| {
+                range
+                    .ranges
+                    .iter()
+                    .map(move |r| resolver.block_row(*r, cols.clone()))
+            })
+            .collect();
         if operator == Operator::Yank {
             let text = range
                 .ranges
                 .iter()
-                .map(|r| view.text.slice(r.start.0, r.end.0))
+                .enumerate()
+                .map(|(i, r)| {
+                    rows.get(i).map_or_else(
+                        || view.text.slice(r.start.0, r.end.0),
+                        |row| std::borrow::Cow::Borrowed(row.selected.as_str()),
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join(if matches!(shape, Shape::Block { .. }) {
                     "\n"
@@ -327,13 +373,16 @@ impl Session {
         let replacements: Vec<_> = range
             .ranges
             .iter()
-            .map(|r| {
+            .enumerate()
+            .map(|(i, r)| {
                 let text = if case {
                     transform_case(&view.text.slice(r.start.0, r.end.0), operator)
                 } else if operator == Operator::Change && shape == Shape::Line {
                     view.text
                         .slice(r.start.0, resolver.first_non_blank(r.start.0))
                         .into_owned()
+                } else if let Some(row) = rows.get(i) {
+                    " ".repeat(row.before + row.after)
                 } else {
                     String::new()
                 };
@@ -350,27 +399,39 @@ impl Session {
         if case && !state.mode.is_visual() && matches!(command.action, Action::ToggleCase) {
             cursor = range.ranges[0].end;
         }
+        if matches!(operator, Operator::Delete | Operator::Change) && !rows.is_empty() {
+            cursor.0 += rows[0].before;
+        }
         if operator == Operator::Change && matches!(shape, Shape::Block { .. }) {
-            state.block_origin = Some(range.ranges[0].start);
+            state.block_origin = Some(cursor);
             state.block_insert = range
                 .ranges
                 .iter()
+                .zip(&rows)
                 .skip(1)
-                .map(|r| BlockInsertion {
+                .filter(|(_, row)| !row.short)
+                .map(|(r, _)| BlockInsertion {
                     offset: r.start,
                     padding: 0,
+                    tab_tail: None,
                 })
                 .collect();
-            let removed: Vec<_> = range
-                .ranges
+            let removed: Vec<_> = replacements
                 .iter()
                 .map(|r| AppliedEdit {
-                    range: *r,
+                    range: r.range,
                     removed: String::new(),
-                    inserted: String::new(),
+                    inserted: r.text.clone(),
                 })
                 .collect();
             transform_block_positions(&mut state.block_insert, &removed);
+            for (insert, row) in state
+                .block_insert
+                .iter_mut()
+                .zip(rows.iter().skip(1).filter(|row| !row.short))
+            {
+                insert.offset.0 += row.before;
+            }
         }
         let mode = if operator == Operator::Change {
             Mode::Insert
@@ -392,6 +453,12 @@ impl Session {
                 numbered,
                 separator_bytes: prefix,
                 ends_on_empty_line,
+                projected_rows: range
+                    .ranges
+                    .iter()
+                    .copied()
+                    .zip(rows.into_iter().map(|row| row.selected))
+                    .collect(),
             });
         if operator == Operator::Delete && shape == Shape::Line && prefix == 0 {
             let end = range.ranges[0].end.0;
@@ -468,4 +535,16 @@ fn transform_case(text: &str, operator: Operator) -> String {
         }
     }
     result
+}
+
+fn block_columns(view: DocumentView<'_>, shape: Shape) -> Option<std::ops::Range<usize>> {
+    let Shape::Block { width } = shape else {
+        return None;
+    };
+    let resolver = MotionResolver::from_view(view);
+    let left = view.selection.map_or_else(
+        || resolver.column(view.cursor.0),
+        |s| resolver.block_columns(s).start,
+    );
+    Some(left..left.saturating_add(width))
 }

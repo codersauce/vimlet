@@ -69,6 +69,7 @@ enum Pending {
 struct BlockInsertion {
     offset: ByteOffset,
     padding: usize,
+    tab_tail: Option<usize>,
 }
 
 #[derive(Debug, Clone)]
@@ -107,12 +108,13 @@ struct ReplaceRecovery {
 
 /// Register contents come from the host's actual removal. A final-line delete
 /// also removes its preceding separator, which belongs outside the register.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 struct DeletedRegister {
     shape: Shape,
     numbered: bool,
     separator_bytes: usize,
     ends_on_empty_line: bool,
+    projected_rows: Vec<(crate::TextRange, String)>,
 }
 
 struct PlannedEdit {
@@ -796,6 +798,7 @@ impl Session {
                     numbered,
                     separator_bytes: prefix,
                     ends_on_empty_line,
+                    projected_rows,
                 }) = register
                 {
                     let removed_rows = match (shape, visual) {
@@ -805,7 +808,13 @@ impl Session {
                     let mut text = edits
                         .iter()
                         .take(removed_rows)
-                        .map(|e| e.removed.as_str())
+                        .enumerate()
+                        .map(|(i, edit)| {
+                            projected_rows
+                                .get(i)
+                                .filter(|(range, _)| *range == edit.range)
+                                .map_or(edit.removed.as_str(), |(_, text)| text.as_str())
+                        })
                         .collect::<Vec<_>>()
                         .join(if matches!(shape, Shape::Block { .. }) {
                             "\n"
