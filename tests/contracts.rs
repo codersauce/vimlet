@@ -24,6 +24,80 @@ fn successful_change_and_insert_form_one_undo_group() {
 }
 
 #[test]
+fn counted_macro_is_one_undo_group_separate_from_its_recording() {
+    let original = "TODO one\nTODO two\nTODO three\nTODO four\nTODO five\nTODO six";
+    let (mut h, mut s, mut e) = run(original, "qa0cw- [ ]<Esc>j0q");
+    let recorded = h.text.clone();
+    h.keys(&mut s, &mut e, "5@a");
+    let replayed = h.text.clone();
+    assert!(!replayed.contains("TODO"));
+    assert_eq!(h.undo_groups, 2);
+    h.keys(&mut s, &mut e, "u");
+    assert_eq!(h.text, recorded);
+    h.keys(&mut s, &mut e, "<C-r>");
+    assert_eq!(h.text, replayed);
+    h.keys(&mut s, &mut e, "uu");
+    assert_eq!(h.text, original);
+}
+
+#[test]
+fn canceled_macro_commits_before_the_next_user_edit() {
+    let (mut h, mut s, mut e) = run("abcdef", "");
+    s.registers_mut().set(
+        'a',
+        Register::from_keys(vec![
+            Key::Char('x'),
+            Key::Named("suspend".into()),
+            Key::Char('x'),
+        ]),
+    );
+    h.keys(&mut s, &mut e, "@a");
+    assert_eq!(h.text, "bcdef");
+    assert!(s.is_playing());
+    s.cancel_playback();
+    h.keys(&mut s, &mut e, "x");
+    assert_eq!(h.undo_groups, 2);
+    h.keys(&mut s, &mut e, "u");
+    assert_eq!(h.text, "bcdef");
+    h.keys(&mut s, &mut e, "u");
+    assert_eq!(h.text, "abcdef");
+}
+
+#[test]
+fn failed_macro_motion_closes_its_edits_and_discards_the_tail() {
+    let (mut h, mut s, mut e) = run("abcdef", "");
+    s.registers_mut().set(
+        'a',
+        Register::from_keys(vec![
+            Key::Char('x'),
+            Key::Char('f'),
+            Key::Char('z'),
+            Key::Char('x'),
+        ]),
+    );
+    h.keys(&mut s, &mut e, "2@a");
+    assert_eq!(h.text, "bcdef");
+    assert_eq!(h.undo_groups, 1);
+    assert!(!s.is_playing());
+    h.keys(&mut s, &mut e, "u");
+    assert_eq!(h.text, "abcdef");
+}
+
+#[test]
+fn macro_ending_in_insert_keeps_subsequent_typing_in_its_undo_group() {
+    let (mut h, mut s, mut e) = run("abc", "");
+    s.registers_mut().set(
+        'a',
+        Register::from_keys(vec![Key::Char('i'), Key::Char('Y')]),
+    );
+    h.keys(&mut s, &mut e, "@aZ<Esc>");
+    assert_eq!(h.text, "YZabc");
+    assert_eq!(h.undo_groups, 1);
+    h.keys(&mut s, &mut e, "u");
+    assert_eq!(h.text, "abc");
+}
+
+#[test]
 fn failed_target_never_runs_dot_insertion_tail() {
     let (mut h, mut s, mut e) = run("one x two", "cfxYES<Esc>$.");
     assert_eq!(h.text, "YES two");

@@ -356,18 +356,20 @@ pub struct Replacement {
 }
 
 /// Grouping instructions for host-owned undo. Begin/Continue/End encompass one
-/// Insert/Replace session. Atomic is a whole command; an End can have no edits.
+/// Insert/Replace session or one complete macro invocation, including its count and nested calls.
+/// Atomic is a whole command; an End can have no edits. During macro playback, command-local
+/// boundaries are joined without changing mode transitions or dot-repeat recipes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Transaction {
     /// Treat this command as a complete undo group.
     Atomic,
-    /// Open a group for the upcoming Insert or Replace session.
+    /// Open a group for an Insert/Replace session or a macro invocation.
     Begin,
     /// Add edits to the currently open group.
     Continue,
     /// Close the current undo group while keeping an insertion-point cursor.
     BreakInsert,
-    /// Close the current group when leaving Insert or Replace.
+    /// Close the current group when leaving Insert/Replace or finishing a macro invocation.
     End,
 }
 

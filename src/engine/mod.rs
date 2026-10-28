@@ -6,6 +6,7 @@ mod api;
 mod edits;
 mod execute;
 mod insert;
+mod macro_transaction;
 mod parser;
 mod playback;
 mod put;
@@ -21,6 +22,7 @@ pub use api::{
     InsertStyle, Key, Lifecycle, Mode, OperationKind, Operator, Replacement, Step, TargetRequest,
     Transaction,
 };
+use macro_transaction::MacroContinuation;
 pub use playback::MacroPlayback;
 use std::collections::VecDeque;
 
@@ -141,6 +143,7 @@ enum Effect {
     EndInsert,
     Resolve(Command),
     History,
+    FinishMacro(Box<MacroContinuation>),
 }
 
 #[derive(Debug, Clone)]
@@ -187,6 +190,7 @@ pub struct EditingState {
     block_insert: Vec<BlockInsertion>,
     block_origin: Option<ByteOffset>,
     document: Option<u64>,
+    macro_transaction: bool,
 }
 
 impl Default for EditingState {
@@ -210,6 +214,7 @@ impl EditingState {
             mode,
             capabilities,
             pending: None,
+            macro_transaction: false,
             count: None,
             awaiting: None,
             last_character: None,
@@ -495,6 +500,9 @@ impl Session {
     }
 
     /// Discard queued macro input, including remaining nested frames.
+    ///
+    /// The surface's open macro undo group closes before its next input. If playback
+    /// ended in Insert/Replace, subsequent typing stays in that group until the mode ends.
     pub fn cancel_playback(&mut self) {
         self.playback.cancel();
         self.macro_document = None;
@@ -509,6 +517,7 @@ impl Session {
     /// through Escape before switching documents; this call invalidates queued
     /// continuations and never mutates host history on its own.
     pub fn lifecycle(&mut self, state: &mut EditingState, event: Lifecycle) {
+        state.macro_transaction = false;
         state.pending = None;
         state.count = None;
         state.awaiting = None;
@@ -538,7 +547,28 @@ impl Session {
 
     /// Interpret one input against the host's current document view.
     /// Pass any returned host operation to the host and acknowledge its result with [`Self::resume`].
+    /// Counted and nested macro playback shares one host undo transaction; hosts must honor
+    /// the emitted [`Transaction`] markers rather than grouping each Normal-mode key separately.
     pub fn handle(
+        &mut self,
+        state: &mut EditingState,
+        input: Input,
+        view: DocumentView<'_>,
+    ) -> Step {
+        if state.macro_transaction
+            && !self.is_playing()
+            && !matches!(state.mode, Mode::Insert | Mode::Replace)
+            && state.awaiting.is_none()
+            && state.document == Some(view.version.id)
+            && view.is_valid()
+        {
+            return self.finish_macro_transaction(state, view, MacroContinuation::Input(input));
+        }
+        let step = self.handle_input(state, input, view);
+        self.finish_macro_step(state, step, view)
+    }
+
+    fn handle_input(
         &mut self,
         state: &mut EditingState,
         input: Input,
@@ -696,9 +726,28 @@ impl Session {
         &mut self,
         state: &mut EditingState,
         view: DocumentView<'_>,
-        kind: OperationKind,
+        mut kind: OperationKind,
         effect: Effect,
     ) -> Step {
+        if state.macro_transaction && matches!(kind, OperationKind::History { .. }) {
+            return self.finish_macro_transaction(
+                state,
+                view,
+                MacroContinuation::Request { kind, effect },
+            );
+        }
+        if let OperationKind::Edit { transaction, .. } = &mut kind {
+            if self.is_playing() && !matches!(effect, Effect::FinishMacro(_)) {
+                *transaction = if state.macro_transaction {
+                    Transaction::Continue
+                } else {
+                    Transaction::Begin
+                };
+                state.macro_transaction = true;
+            } else if matches!(transaction, Transaction::End | Transaction::BreakInsert) {
+                state.macro_transaction = false;
+            }
+        }
         self.next_operation = self.next_operation.wrapping_add(1);
         let operation = HostOperation {
             id: self.next_operation,
@@ -716,6 +765,16 @@ impl Session {
     /// Acknowledge an operation after host-side revision checking and execution.
     /// Wrong operation IDs do not consume the outstanding operation.
     pub fn resume(
+        &mut self,
+        state: &mut EditingState,
+        result: HostResult,
+        view: DocumentView<'_>,
+    ) -> Step {
+        let step = self.resume_operation(state, result, view);
+        self.finish_macro_step(state, step, view)
+    }
+
+    fn resume_operation(
         &mut self,
         state: &mut EditingState,
         result: HostResult,
@@ -898,6 +957,15 @@ impl Session {
                 state.replay_tail = None;
             }
             Effect::Resolve(_) => unreachable!(),
+            Effect::FinishMacro(continuation) => {
+                return match *continuation {
+                    MacroContinuation::Input(input) => self.handle_input(state, input, view),
+                    MacroContinuation::Step(step) => step,
+                    MacroContinuation::Request { kind, effect } => {
+                        self.request(state, view, kind, effect)
+                    }
+                };
+            }
         }
         if state.replay_tail.is_some() && matches!(state.mode, Mode::Insert | Mode::Replace) {
             if let Some(edit) = state.replay_tail.as_mut().and_then(VecDeque::pop_front) {

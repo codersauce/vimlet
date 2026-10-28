@@ -2165,5 +2165,69 @@
     "name": "block edge l<C-v>jjd.",
     "text": "abc\n界xy\nklm",
     "keys": "l<C-v>jjd."
+  },
+  {
+    "name": "counted macro undo",
+    "text": "TODO one\nTODO two\nTODO three\nTODO four\nTODO five\nTODO six",
+    "keys": "qa0cw- [ ]<Esc>j0q5@au",
+    "requires_history": true
+  },
+  {
+    "name": "counted macro redo",
+    "text": "TODO one\nTODO two\nTODO three\nTODO four\nTODO five\nTODO six",
+    "keys": "qa0cw- [ ]<Esc>j0q5@au<C-r>",
+    "requires_history": true,
+    "check": [
+      "text",
+      "mode",
+      "register",
+      "register_type"
+    ]
+  },
+  {
+    "name": "macro recording remains a separate undo group",
+    "text": "TODO one\nTODO two\nTODO three\nTODO four\nTODO five\nTODO six",
+    "keys": "qa0cw- [ ]<Esc>j0q5@auu",
+    "requires_history": true
+  },
+  {
+    "name": "macro with atomic edits and final motion undo",
+    "text": "abcdef",
+    "keys": "qaxlq2@au",
+    "requires_history": true
+  },
+  {
+    "name": "nested macro undo",
+    "text": "abcdefghi",
+    "keys": "qaxq@@qb@axq@bu",
+    "requires_history": true
+  },
+  {
+    "name": "separate macro calls undo separately",
+    "text": "abcdefghi",
+    "keys": "qaxq@a@au",
+    "requires_history": true
+  },
+  {
+    "name": "macro normal cursor after deleting the final character",
+    "text": "abc",
+    "keys": "qa$xiX<Esc>qu$@a",
+    "requires_history": true
+  },
+  {
+    "name": "undo inside macro flushes earlier playback edits",
+    "text": "abcdefghi",
+    "keys": "qaxuxq@au",
+    "requires_history": true
+  },
+  {
+    "name": "counted macro changes across logical lines",
+    "text": "TODO one\nTODO two\nTODO three\nTODO four\nTODO five\nTODO six",
+    "keys": "qa0cw- [ ]<Esc>j0q5@a"
+  },
+  {
+    "name": "macro joined edits preserve the normal cursor",
+    "text": "abc",
+    "keys": "qa$xiX<Esc>q@a"
   }
 ]

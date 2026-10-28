@@ -44,6 +44,12 @@ impl<K> MacroPlayback<K> {
         !self.frames.is_empty()
     }
 
+    pub(super) fn has_remaining_keys(&self) -> bool {
+        self.frames
+            .iter()
+            .any(|frame| frame.index < frame.keys.len() || frame.repeats > 1)
+    }
+
     /// Discard every frame and its remaining repetitions.
     pub fn cancel(&mut self) {
         self.frames.clear();

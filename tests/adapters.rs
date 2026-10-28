@@ -17,6 +17,7 @@ fn the_same_command_streams_work_over_borrowed_strings_and_ropes() {
             || keys.contains("<C-r>")
             || keys.contains("xU")
             || keys.contains("<Esc>u")
+            || case["requires_history"].as_bool() == Some(true)
         {
             continue;
         }
