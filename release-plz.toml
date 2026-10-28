@@ -1,0 +1,33 @@
+[workspace]
+release_always = false
+semver_check = true
+dependencies_update = false
+git_release_enable = true
+publish_timeout = "10m"
+
+[changelog]
+header = "# Changelog\n\nNotable changes to Vimlet. Each release uses the same notes here and on GitHub.\n\n"
+protect_breaking_commits = true
+sort_commits = "oldest"
+postprocessors = [{ pattern = "\n{3,}", replace = "\n\n" }]
+commit_parsers = [
+    { field = "breaking", pattern = "true", group = "0Breaking changes" },
+    { message = "^feat", group = "1Added" },
+    { message = "^fix", group = "2Fixed" },
+    { message = "^perf", group = "3Performance" },
+    { message = "^docs", group = "4Documentation" },
+    { message = "^(chore|ci|build|test|style|refactor)(\\(|:)", skip = true },
+    { message = "^Merge ", skip = true },
+    { message = ".*", group = "5Changed" },
+]
+body = """
+## [{{ version }}](https://github.com/codersauce/vimlet/releases/tag/v{{ version }}) — {{ timestamp | date(format="%Y-%m-%d") }}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | trim_start_matches(pat="0") | trim_start_matches(pat="1") | trim_start_matches(pat="2") | trim_start_matches(pat="3") | trim_start_matches(pat="4") | trim_start_matches(pat="5") }}
+
+{% for commit in commits -%}
+- {{ commit.message | split(pat="\n") | first | upper_first }}{% if commit.links %} ({% for link in commit.links %}[{{ link.text }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %}){% endif %}
+{% endfor %}
+{% endfor %}
+{% if release_link %}[Full changelog]({{ release_link }}){% endif %}
+"""

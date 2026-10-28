@@ -16,7 +16,7 @@
 //! Add this under `[dependencies]` in the application's `Cargo.toml`:
 //!
 //! ```toml
-//! vimlet = "0.1"
+//! vimlet = "0.2"
 //! ```
 //!
 //! The default feature set supports strings and custom text sources. No Ropey
