@@ -1,5 +1,13 @@
 name: Vimlet
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 jobs:
   rust:
     runs-on: ubuntu-latest
@@ -9,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: rustup toolchain install 1.90.0 --profile minimal
+      - uses: Swatinem/rust-cache@e9d7b9f1e587218970671bac74e5511ed9506e6a # v2
+        with:
+          key: ${{ matrix.features }}
       - run: cargo +1.90.0 test --locked ${{ matrix.features }}
       - run: cargo clippy --locked --all-targets ${{ matrix.features }} -- -D warnings
       - run: cargo doc --locked --no-deps ${{ matrix.features }}
@@ -19,6 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@e9d7b9f1e587218970671bac74e5511ed9506e6a # v2
+        with:
+          key: reference
       - run: |
           curl --fail --location --output "$RUNNER_TEMP/nvim.tar.gz" https://github.com/neovim/neovim/releases/download/v0.12.1/nvim-linux-x86_64.tar.gz
           tar -xzf "$RUNNER_TEMP/nvim.tar.gz" -C "$RUNNER_TEMP"

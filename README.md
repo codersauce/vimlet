@@ -6,6 +6,12 @@
 
 # Vimlet
 
+[![Crates.io](https://img.shields.io/crates/v/vimlet.svg)](https://crates.io/crates/vimlet)
+[![Documentation](https://docs.rs/vimlet/badge.svg)](https://docs.rs/vimlet)
+[![CI](https://github.com/codersauce/vimlet/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/codersauce/vimlet/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/crates/l/vimlet.svg)](LICENSE)
+[![Rust](https://img.shields.io/crates/msrv/vimlet.svg)](Cargo.toml)
+
 Vimlet adds Vim editing to Rust applications. Extracted from the Red editor, it interprets keys, manages modes, registers and repeat, and returns operations for your application to apply. Your application keeps its text storage, undo history and UI.
 
 Use a plain `String`, implement `TextSource` for your buffer, or enable the optional `ropey` adapter. Vimlet has no dependency on Red or an async runtime. Rust 1.90 or newer is required.
@@ -32,14 +38,14 @@ Add Vimlet to your application's `Cargo.toml`:
 
 ```toml
 [dependencies]
-vimlet = "0.1"
+vimlet = "0.2"
 ```
 
 For an application that already uses Ropey:
 
 ```toml
 [dependencies]
-vimlet = { version = "0.1", features = ["ropey"] }
+vimlet = { version = "0.2", features = ["ropey"] }
 ropey = "1.6.1"
 ```
 
@@ -93,3 +99,7 @@ python3 scripts/check_package.py
 The [string host](examples/support/mod.rs) demonstrates undo grouping and macro dispatch. The [Ropey host](examples/support/rope.rs) converts byte ranges for rope mutation.
 
 Neovim decides compatibility questions for implemented commands. The reference runner uses Neovim 0.12.1 and Python 3 to compare text, byte cursor, mode and the unnamed register. Vimlet implements modal editing; application services such as search UI, formatting and clipboard transport remain in the host. See the [scope and host contracts](docs/EXTRACTION_PLAN.md).
+
+## Releases
+
+See the [changelog](CHANGELOG.md) for changes and the [release guide](docs/RELEASING.md) for the publishing process.
