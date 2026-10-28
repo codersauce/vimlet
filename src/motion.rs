@@ -354,7 +354,7 @@ impl<'a> MotionResolver<'a> {
     }
 
     /// Resolve a motion from the current cursor. Zero represents an omitted prefix count.
-    /// A character search or delimiter match can return `None` when there is no target.
+    /// Returns `None` when a vertical motion cannot reach another line or a search has no target.
     pub fn resolve(&self, motion: Motion, count: usize) -> Option<Target> {
         let n = count.max(1);
         let mut p = self.cursor;
@@ -386,9 +386,9 @@ impl<'a> MotionResolver<'a> {
                     p = next;
                 }
             }
-            Motion::Up | Motion::Down => {
-                let col = self.column(p);
-                let mut line = self.text.line_start(p);
+            Motion::Up | Motion::Down | Motion::NextLineFirstNonBlank => {
+                let start = self.text.line_start(p);
+                let mut line = start;
                 for _ in 0..n {
                     if motion == Motion::Up {
                         if line == 0 {
@@ -403,23 +403,15 @@ impl<'a> MotionResolver<'a> {
                         line = next;
                     }
                 }
-                p = self.at_column(line, col);
-                linewise = true;
-            }
-            Motion::NextLineFirstNonBlank => {
-                let start = self.text.line_start(p);
-                let mut line = start;
-                for _ in 0..n {
-                    let next = self.text.next_line(line);
-                    if next <= line || self.text.byte_at(next - 1) != Some(b'\n') {
-                        break;
-                    }
-                    line = next;
-                }
+                // Neovim stops a macro only if the motion could not advance even one line.
                 if line == start {
                     return None;
                 }
-                p = self.first_non_blank(line);
+                p = if motion == Motion::NextLineFirstNonBlank {
+                    self.first_non_blank(line)
+                } else {
+                    self.at_column(line, self.column(p))
+                };
                 linewise = true;
             }
             Motion::LineStart => p = self.text.line_start(p),
@@ -678,11 +670,6 @@ impl<'a> MotionResolver<'a> {
             self.resolve(motion, count)?
         };
         if target.linewise {
-            if matches!(motion, Motion::Up | Motion::Down)
-                && self.text.line_start(target.position.0) == self.text.line_start(self.cursor)
-            {
-                return None;
-            }
             return Some(self.lines(self.cursor, target.position.0));
         }
         if change
