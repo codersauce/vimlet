@@ -115,6 +115,16 @@
     "keys": "qbix<Esc>qqa2@bq2@a"
   },
   {
+    "name": "blocked upward motion stops remaining macro repetitions",
+    "text": "first\nsecond",
+    "keys": "Gqa0xk0q2@a"
+  },
+  {
+    "name": "counted downward motion that reaches another line continues the macro",
+    "text": "abc\ndef\nghi",
+    "keys": "qa9j0qggl@a"
+  },
+  {
     "name": "last macro",
     "text": "abc def ghi",
     "keys": "qaxq@a@@"
