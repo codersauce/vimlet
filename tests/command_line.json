@@ -1,0 +1,16 @@
+[
+  {"kind":"Ex","keys":["i","w","d","d","u"],"text":"iwddu","caret":5},
+  {"kind":"Ex","keys":["a","b","界","Left","X"],"text":"abX界","caret":3},
+  {"kind":"Ex","keys":["a","👩","‍","👩","‍","👦","Backspace"],"text":"a","caret":1},
+  {"kind":"Ex","keys":["o","n","e"," ","t","w","o","!","Left","Ctrl-w"],"text":"one !","caret":4},
+  {"kind":"Ex","keys":["o","n","e"," ","t","w","o","!","Left","Ctrl-u"],"text":"!","caret":0},
+  {"kind":"Ex","keys":["a","b","c","Delete"],"text":"ab","caret":2},
+  {"kind":"Ex","keys":["Backspace"],"outcome":"cancelled"},
+  {"kind":"SearchForward","keys":["Backspace"],"outcome":"cancelled"},
+  {"kind":"SearchBackward","keys":["d","w","a"],"text":"dwa","caret":3},
+  {"kind":"Field","keys":["Backspace","Z"],"text":"Z","caret":1},
+  {"kind":"Field","initial":"XY","keys":["z","Enter"],"outcome":"XYz"},
+  {"kind":"Field","keys":["Enter"],"outcome":""},
+  {"kind":"Field","initial":"XY","keys":["Escape"],"outcome":"cancelled"},
+  {"kind":"Ex","keys":["f","o","o","Paste:A\r\nB"],"text":"fooA","caret":4}
+]

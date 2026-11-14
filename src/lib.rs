@@ -68,6 +68,7 @@
 
 #![warn(missing_docs)]
 
+pub mod command_line;
 pub mod engine;
 #[cfg(doc)]
 pub mod guide;
@@ -76,6 +77,9 @@ pub mod registers;
 pub mod text;
 pub mod types;
 
+pub use command_line::{
+    CommandLine, InvalidPromptDraft, PromptDirection, PromptKind, PromptOutcome,
+};
 pub use engine::{
     Action, AppliedEdit, Binding, BindingContext, Capabilities, Command, EditTarget, EditingState,
     EngineError, HistoryCommand, HostCommand, HostOperation, HostOutcome, HostResult, Input,
