@@ -2,6 +2,13 @@
 
 Notable changes to Vimlet. Each release uses the same notes here and on GitHub.
 
+## [0.2.1](https://github.com/codersauce/vimlet/releases/tag/v0.2.1) — 2026-11-14
+
+### Added
+
+- Add single-line command and field editing ([#3](https://github.com/codersauce/vimlet/pull/3))
+
+[Full changelog](https://github.com/codersauce/vimlet/compare/v0.2.0...v0.2.1)
 ## [0.2.0](https://github.com/codersauce/vimlet/releases/tag/v0.2.0) — 2026-10-28
 
 Vimlet 0.2 adds host-dispatched macros and improves repeat, Visual editing, and undo grouping.
