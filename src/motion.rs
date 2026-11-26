@@ -538,8 +538,12 @@ impl<'a> MotionResolver<'a> {
                 }
                 if end && self.kind(p, big) != 0 {
                     let k = self.kind(p, big);
-                    while p > 0 && self.kind(self.previous(p), big) == k {
-                        p = self.previous(p);
+                    while p > 0 {
+                        let previous = self.previous(p);
+                        if self.kind(previous, big) != k {
+                            break;
+                        }
+                        p = previous;
                     }
                 }
                 if p == 0 {
@@ -551,8 +555,12 @@ impl<'a> MotionResolver<'a> {
                 }
                 if !end {
                     let k = self.kind(p, big);
-                    while p > 0 && self.kind(self.previous(p), big) == k {
-                        p = self.previous(p);
+                    while p > 0 {
+                        let previous = self.previous(p);
+                        if self.kind(previous, big) != k {
+                            break;
+                        }
+                        p = previous;
                     }
                 }
             } else {
@@ -569,8 +577,12 @@ impl<'a> MotionResolver<'a> {
                     }
                     if p < len {
                         let k = self.kind(p, big);
-                        while self.next(p) < len && self.kind(self.next(p), big) == k {
-                            p = self.next(p);
+                        loop {
+                            let next = self.next(p);
+                            if next >= len || self.kind(next, big) != k {
+                                break;
+                            }
+                            p = next;
                         }
                     }
                 } else {

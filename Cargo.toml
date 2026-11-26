@@ -11,7 +11,7 @@ homepage = "https://github.com/codersauce/vimlet"
 documentation = "https://docs.rs/vimlet"
 keywords = ["vim", "editor", "modal", "headless"]
 categories = ["text-editors"]
-include = ["src/**", "examples/**", "tests/**", "docs/**", "scripts/**", "assets/vimlet.png", "Cargo.toml", "Cargo.lock", "README.md", "CHANGELOG.md", "LICENSE", "NOTICE"]
+include = ["src/**", "benches/**", "examples/**", "tests/**", "docs/**", "scripts/**", "assets/vimlet.png", "Cargo.toml", "Cargo.lock", "README.md", "CHANGELOG.md", "LICENSE", "NOTICE"]
 
 [package.metadata.docs.rs]
 all-features = true
@@ -34,4 +34,9 @@ unsafe_code = "forbid"
 
 [[example]]
 name = "rope"
+required-features = ["ropey"]
+
+[[bench]]
+name = "word_motions"
+harness = false
 required-features = ["ropey"]
