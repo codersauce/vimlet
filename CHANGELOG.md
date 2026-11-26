@@ -2,6 +2,13 @@
 
 Notable changes to Vimlet. Each release uses the same notes here and on GitHub.
 
+## [0.2.2](https://github.com/codersauce/vimlet/releases/tag/v0.2.2) — 2026-11-26
+
+### Changed
+
+- Reuse grapheme offsets to speed up word motions ([#5](https://github.com/codersauce/vimlet/pull/5))
+
+[Full changelog](https://github.com/codersauce/vimlet/compare/v0.2.1...v0.2.2)
 ## [0.2.1](https://github.com/codersauce/vimlet/releases/tag/v0.2.1) — 2026-11-14
 
 ### Added
